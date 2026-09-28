@@ -1,0 +1,3 @@
+# GATE-RLM: router + relevance gate + stopping rule (thresholds from sweep)
+name: gate_full
+mode: gate

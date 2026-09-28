@@ -1,0 +1,6 @@
+# B2: vanilla RLM, repository defaults, no gating (evidence is still logged)
+name: b2_vanilla
+mode: vanilla
+router: {enabled: false}
+relevance: {enabled: false}
+stopping: {enabled: false}

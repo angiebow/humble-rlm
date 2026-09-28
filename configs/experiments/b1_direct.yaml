@@ -1,0 +1,3 @@
+# B1: direct LLM, one call with the full context (fails if it does not fit)
+name: b1_direct
+mode: direct

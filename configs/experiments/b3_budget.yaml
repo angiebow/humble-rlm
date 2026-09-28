@@ -1,0 +1,9 @@
+# B3: vanilla RLM with hard budget caps (the naive efficiency baseline)
+name: b3_budget
+mode: vanilla
+router: {enabled: false}
+relevance: {enabled: false}
+stopping: {enabled: false}
+rlm:
+  max_total_calls: 12
+  max_total_tokens: 60000

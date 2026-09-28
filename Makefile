@@ -1,0 +1,46 @@
+# GATE-RLM pipeline. Run `make help` for targets.
+PY      ?= python
+DATA    ?= data/processed/babilong.jsonl
+WORKERS ?= 4
+TH      := results/thresholds.json
+RUNS    := results/runs
+
+help:
+	@grep -E '^[a-z-]+:.*## ' Makefile | awk -F':.*## ' '{printf "  %-12s %s\n", $$1, $$2}'
+
+setup: ## install the package and dependencies
+	$(PY) -m pip install -e ".[dev,tokens]"
+
+test: ## unit + fake-model integration tests (no API calls)
+	$(PY) -m pytest -q
+
+data: ## build the BABILong subset (D1)
+	$(PY) scripts/prepare_babilong.py --tasks qa1 qa2 --lengths 4k 32k 128k 512k --n 30
+
+smoke: ## 3 real examples with the cheap dev pair (costs cents)
+	$(PY) experiments/run.py --config configs/experiments/dev_cheap.yaml --data $(DATA) --split val --limit 3 --workers 1
+
+observe-val: ## log all signals on validation (input to sweep + RQ2)
+	$(PY) experiments/run.py --config configs/experiments/observe.yaml --data $(DATA) --split val --seeds 0 --workers $(WORKERS)
+
+sweep: ## choose + freeze thresholds from the validation logs
+	$(PY) experiments/sweep.py --logs $(RUNS)/observe__*__val.jsonl --out $(TH)
+
+signals: ## RQ2 table: AUROC/AUPRC per signal
+	$(PY) eval/signals.py --logs $(RUNS)/observe__*__val.jsonl
+
+test-runs: ## baselines + GATE-RLM on the test split (3 seeds)
+	for c in b1_direct b2_vanilla b3_budget gate_full; do \
+	  $(PY) experiments/run.py --config configs/experiments/$$c.yaml --data $(DATA) --split test --thresholds $(TH) --workers $(WORKERS); \
+	done
+
+ablations: ## ablations on the test split (1 seed to save cost)
+	for c in abl_no_router abl_no_relevance abl_no_stopping; do \
+	  $(PY) experiments/run.py --config configs/experiments/$$c.yaml --data $(DATA) --split test --thresholds $(TH) --seeds 0 --workers $(WORKERS); \
+	done
+
+eval: ## main table, RQ3 breakdown, paired tests, figures
+	$(PY) eval/aggregate.py --runs $(RUNS)/*__test.jsonl --reference b2_vanilla --method gate_full
+	$(PY) eval/plots.py
+
+.PHONY: help setup test data smoke observe-val sweep signals test-runs ablations eval

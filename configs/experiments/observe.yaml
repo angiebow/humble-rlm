@@ -1,0 +1,6 @@
+# Observe: structured worker output + all signals logged, but NO gating actions.
+# Run this on the validation split; experiments/sweep.py replays these logs offline
+# to choose thresholds without paying for a live run per threshold.
+name: observe
+mode: observe
+router: {enabled: false}

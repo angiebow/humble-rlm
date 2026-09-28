@@ -1,0 +1,58 @@
+# Base configuration. Experiment files in configs/experiments/ override these keys.
+# Thresholds marked [SWEEP] are chosen on the validation split (experiments/sweep.py)
+# and then FROZEN before any test-split run.
+
+mode: gate              # direct | vanilla | observe | gate
+seeds: [0, 1, 2]        # 3 runs per configuration
+
+models:
+  root: gpt-5           # Thinker (orchestrator)
+  worker: gpt-5-mini    # Worker (sub-calls)
+
+rlm:
+  max_depth: 1          # paper default; sub-calls are plain LM calls
+  max_iterations: 20
+  max_concurrent_subcalls: 4
+  max_total_calls: null   # set only in the budget baseline
+  max_total_tokens: null
+  max_elapsed_seconds: 600
+  max_retries: 2
+  repl_timeout: 10
+  max_output_chars: 2000
+
+router:                 # Stage 0: direct vs recurse (P(IK)-inspired)
+  enabled: true
+  direct_max_tokens: 100000   # contexts larger than this always recurse
+  use_self_assessment: false  # extra LLM call on a context preview
+  preview_chars: 4000
+  tau_route: 0.7              # [SWEEP] min self-assessed P(direct succeeds)
+
+relevance:              # Stage 1: cosine prefilter -> cross-encoder reranker
+  enabled: true
+  embedder: BAAI/bge-small-en-v1.5
+  reranker: BAAI/bge-reranker-base
+  device: cpu
+  passage_chars: 1000
+  top_m_passages: 8           # passages per chunk sent to the reranker
+  tau_cos: 0.30               # [SWEEP] cheap prefilter
+  tau_rel: 0.50               # [SWEEP] reranker relevance (sigmoid score)
+  filter_irrelevant: true     # hide irrelevant sub-call outputs from the root
+
+stopping:               # Stage 2: sufficiency (confidence) OR knee (diminishing returns)
+  enabled: true
+  tau_hi: 0.70                # [SWEEP] best relevance needed to call evidence sufficient
+  tau_conf: 0.70              # [SWEEP] worker confidence needed to count a vote
+  k_agree: 1                  # [SWEEP] agreeing chunks needed (1 for needle tasks)
+  knee:
+    enabled: true
+    rho: 6.0                  # [SWEEP] slope-ratio threshold (Cormack & Grossman)
+    min_checkpoints: 4
+  grace_root_iterations: 1    # root turns allowed after a stop before FINAL is injected
+
+confidence:
+  source: verbalized          # verbalized | logprob (logprob needs a non-reasoning scorer)
+  logprob_scorer: null        # e.g. gpt-4.1-mini, only if source == logprob
+
+logging:
+  capture_trajectory_content: true   # needed to detect when gold evidence was read
+  out_dir: results/runs

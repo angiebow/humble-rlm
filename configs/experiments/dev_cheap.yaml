@@ -1,0 +1,5 @@
+# Development / smoke tests only: cheap pair, 1 seed. Never report these numbers.
+name: dev_cheap
+mode: gate
+seeds: [0]
+models: {root: gpt-5-mini, worker: gpt-5-mini}

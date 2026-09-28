@@ -1,0 +1,3 @@
+name: abl_no_router
+mode: gate
+router: {enabled: false}

@@ -1,0 +1,33 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+build/
+dist/
+
+# Data (large; regenerate with scripts/)
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Run outputs (commit only the final, frozen ones you cite in the paper)
+results/runs/*
+results/figures/*
+!results/runs/.gitkeep
+!results/figures/.gitkeep
+
+# Model caches
+.cache/
+hf_cache/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/

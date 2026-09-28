@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gate-rlm"
+version = "0.1.0"
+description = "GATE-RLM: Gated Adaptive Termination for Recursive Language Models"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    # Pinned for reproducibility: the RLM implementation GATE-RLM extends.
+    "recursive-llm @ git+https://github.com/grishahq/recursive-llm.git@b81ab894d4190757a632822478f454f8b9c6275c",
+    "litellm>=1.0.0,<1.98.0",
+    "sentence-transformers>=3.0",
+    "datasets>=2.19",
+    "numpy>=1.26",
+    "pandas>=2.1",
+    "scipy>=1.11",
+    "scikit-learn>=1.4",
+    "matplotlib>=3.8",
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0",
+    "tqdm>=4.66",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+tokens = ["tiktoken>=0.7"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "."]
