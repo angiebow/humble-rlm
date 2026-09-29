@@ -8,7 +8,14 @@ models:
 # probe_api_base bypasses litellm for the logprob probe -- mlx_lm.server's
 # logprobs response has token:null, which fails litellm's strict response
 # validation even though generation succeeds. Point this at whichever port
-# scripts/start_mlx_local.sh binds the root server to.
-router: {enabled: true, method: logprob, tau_route: 0.75, probe_api_base: "http://localhost:8011/v1"}
+# scripts/start_mlx_local.sh binds the root server to. probe_model is the
+# backend's own model name (not the models.root litellm alias), since this
+# call skips the litellm proxy entirely.
+router:
+  enabled: true
+  method: logprob
+  tau_route: 0.75
+  probe_api_base: "http://localhost:8011/v1"
+  probe_model: "mlx-community/Qwen3.5-35B-A3B-4bit"
 relevance: {enabled: false}
 stopping: {enabled: false}

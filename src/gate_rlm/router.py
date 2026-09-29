@@ -119,8 +119,12 @@ def _logprob_pik(query: str, context: str, n_tokens: int, cfg: dict) -> RouteDec
     probe_api_base = rcfg.get("probe_api_base")
 
     if probe_api_base:
+        # probe_model is the backend's own model name (e.g. mlx_lm.server's
+        # "mlx-community/..."), NOT the litellm proxy alias in models.root --
+        # this call bypasses the proxy entirely, so the alias means nothing here.
+        probe_model = rcfg.get("probe_model", cfg["models"]["root"])
         answer, logprobs, usage = _raw_logprob_probe(
-            prompt, cfg["models"]["root"], probe_api_base, max_tokens
+            prompt, probe_model, probe_api_base, max_tokens
         )
     else:
         import litellm
