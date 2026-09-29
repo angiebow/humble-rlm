@@ -1,0 +1,18 @@
+# litellm proxy config: routes two named models to two separate mlx_lm.server
+# backends (root and worker each serve one model on their own port). RLM's own
+# api_base is a single value per run, so this proxy is what lets root/worker
+# resolve to different local servers under one endpoint.
+model_list:
+  - model_name: qwen35-root
+    litellm_params:
+      model: openai/mlx-community/Qwen3.5-35B-A3B-4bit
+      api_base: http://localhost:8001/v1
+      api_key: "not-needed"
+  - model_name: qwen35-worker
+    litellm_params:
+      model: openai/mlx-community/Qwen3.5-2B-MLX-8bit
+      api_base: http://localhost:8002/v1
+      api_key: "not-needed"
+
+general_settings:
+  port: 4000

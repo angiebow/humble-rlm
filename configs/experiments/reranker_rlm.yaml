@@ -4,8 +4,8 @@
 name: reranker_rlm
 mode: gate
 models:
-  root: ollama/qwen3.5:35b
-  worker: ollama/qwen3.5:2b
+  root: openai/qwen35-root
+  worker: openai/qwen35-worker
 router: {enabled: false}
 relevance: {enabled: true, filter_irrelevant: true}
 stopping: {enabled: false}
