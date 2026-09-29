@@ -16,3 +16,15 @@ model_list:
 
 general_settings:
   port: 4000
+
+# Each model above has exactly ONE deployment (one mlx_lm.server instance),
+# no redundant backup to fall back to. litellm's default deployment-cooldown
+# behavior (meant for multi-deployment setups) blacklists the sole deployment
+# after a single transient failure/timeout, so every subsequent request fails
+# immediately with RateLimitError/NotFoundError ("no deployments available")
+# even though the backend is healthy -- a cascading failure with no recovery.
+# Disabling cooldowns is correct here since there's nothing to fail over to.
+router_settings:
+  disable_cooldowns: true
+  allowed_fails: 999999
+  cooldown_time: 0
