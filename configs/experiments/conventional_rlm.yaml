@@ -1,0 +1,9 @@
+# Conventional-RLM: unmodified vanilla RLM, no gating stages. Evaluation baseline.
+name: conventional_rlm
+mode: vanilla
+models:
+  root: ollama/qwen3.5:35b
+  worker: ollama/qwen3.5:2b
+router: {enabled: false}
+relevance: {enabled: false}
+stopping: {enabled: false}

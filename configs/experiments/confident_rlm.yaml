@@ -1,0 +1,8 @@
+# Confident-RLM: all three stages combined (router + reranker + stopping).
+# Equivalent to gate_full, restated under this evaluation's naming and fixed
+# to the Qwen 3.5 local pair.
+name: confident_rlm
+mode: gate
+models:
+  root: ollama/qwen3.5:35b
+  worker: ollama/qwen3.5:2b

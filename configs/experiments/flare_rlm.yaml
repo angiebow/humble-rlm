@@ -1,0 +1,11 @@
+# FLARE-RLM: only Stage 2 (sufficiency stopping) active, relevance disabled so
+# every chunk counts as relevant (Thresholds.use_relevance=False) -- pure
+# confidence + agreement voting, FLARE/DeepConf-style, no reranker involved.
+name: flare_rlm
+mode: gate
+models:
+  root: ollama/qwen3.5:35b
+  worker: ollama/qwen3.5:2b
+router: {enabled: false}
+relevance: {enabled: false}
+stopping: {enabled: true}

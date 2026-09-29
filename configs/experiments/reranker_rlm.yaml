@@ -1,0 +1,11 @@
+# Reranker-RLM: only Stage 1 (cosine prefilter + cross-encoder reranker) active.
+# Always recurses (router off), irrelevant chunks are filtered from the root,
+# no adaptive stopping.
+name: reranker_rlm
+mode: gate
+models:
+  root: ollama/qwen3.5:35b
+  worker: ollama/qwen3.5:2b
+router: {enabled: false}
+relevance: {enabled: true, filter_irrelevant: true}
+stopping: {enabled: false}
