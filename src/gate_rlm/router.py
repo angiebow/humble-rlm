@@ -74,34 +74,76 @@ Answer the question as best you can from this preview alone. Reply with the
 short answer only, no explanation."""
 
 
+def _raw_logprob_probe(prompt: str, model: str, api_base: str, max_tokens: int) -> tuple:
+    """Bypass litellm for the probe call. mlx_lm.server (and possibly other
+    OpenAI-compatible local servers) sets logprobs "token" to null, which
+    fails litellm's strict pydantic response validation even though the
+    generation itself succeeded -- so we hit the backend's REST API directly
+    and read raw JSON instead of letting litellm construct a typed response.
+    """
+    import requests
+
+    resp = requests.post(
+        f"{api_base.rstrip('/')}/chat/completions",
+        json={
+            "model": model,
+            "messages": [{"role": "user", "content": prompt}],
+            "logprobs": True,
+            "max_tokens": max_tokens,
+            "temperature": 0,
+        },
+        timeout=120,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    choice = data["choices"][0]
+    answer = (choice.get("message", {}).get("content") or "").strip()
+    logprobs = [t["logprob"] for t in choice.get("logprobs", {}).get("content", []) or []]
+    usage = dict(data.get("usage", {}) or {})
+    usage["cost_usd"] = None  # local model, no litellm pricing table entry
+    return answer, logprobs, usage
+
+
 def _logprob_pik(query: str, context: str, n_tokens: int, cfg: dict) -> RouteDecision:
     """Kadavath et al. 2022, logit-based P(IK): generate a candidate answer on a
     context preview with logprobs=True, P(IK) = exp(mean log P(token)). If
     P(IK) >= tau_route, that candidate is reused as the final direct answer so
     the route decision costs no extra generation beyond this one probe call.
     """
-    import litellm
-
     rcfg = cfg["router"]
     complex_q = is_complex_query(query)
     prompt = LOGPROB_PROBE_PROMPT.format(
         query=query, n_tokens=n_tokens, preview=context[: rcfg.get("preview_chars", 4000)]
     )
-    resp = litellm.completion(
-        model=cfg["models"]["root"],
-        messages=[{"role": "user", "content": prompt}],
-        logprobs=True,
-        max_tokens=rcfg.get("logprob_probe_max_tokens", 64),
-        temperature=0,
-    )
-    usage = dict(getattr(resp, "usage", {}) or {})
-    usage["cost_usd"] = _safe_cost(resp)
-    answer = (resp.choices[0].message.content or "").strip()
+    max_tokens = rcfg.get("logprob_probe_max_tokens", 64)
+    probe_api_base = rcfg.get("probe_api_base")
+
+    if probe_api_base:
+        answer, logprobs, usage = _raw_logprob_probe(
+            prompt, cfg["models"]["root"], probe_api_base, max_tokens
+        )
+    else:
+        import litellm
+
+        resp = litellm.completion(
+            model=cfg["models"]["root"],
+            messages=[{"role": "user", "content": prompt}],
+            logprobs=True,
+            max_tokens=max_tokens,
+            temperature=0,
+        )
+        usage = dict(getattr(resp, "usage", {}) or {})
+        usage["cost_usd"] = _safe_cost(resp)
+        answer = (resp.choices[0].message.content or "").strip()
+        try:
+            tokens = resp.choices[0].logprobs["content"]
+            logprobs = [t["logprob"] for t in tokens]
+        except (AttributeError, KeyError, TypeError, IndexError):
+            logprobs = []
+
     try:
-        tokens = resp.choices[0].logprobs["content"]
-        logprobs = [t["logprob"] for t in tokens if t.get("token", "").strip()]
         p_ik = math.exp(sum(logprobs) / len(logprobs)) if logprobs else 0.0
-    except (AttributeError, KeyError, TypeError, IndexError, ZeroDivisionError):
+    except (TypeError, ZeroDivisionError):
         p_ik = 0.0
 
     tau = rcfg.get("tau_route", 0.7)

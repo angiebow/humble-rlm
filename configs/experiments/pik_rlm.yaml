@@ -5,6 +5,10 @@ mode: gate
 models:
   root: openai/qwen35-root
   worker: openai/qwen35-worker
-router: {enabled: true, method: logprob, tau_route: 0.75}
+# probe_api_base bypasses litellm for the logprob probe -- mlx_lm.server's
+# logprobs response has token:null, which fails litellm's strict response
+# validation even though generation succeeds. Point this at whichever port
+# scripts/start_mlx_local.sh binds the root server to.
+router: {enabled: true, method: logprob, tau_route: 0.75, probe_api_base: "http://localhost:8011/v1"}
 relevance: {enabled: false}
 stopping: {enabled: false}
