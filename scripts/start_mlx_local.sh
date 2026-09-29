@@ -8,11 +8,16 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 mkdir -p logs
-mlx_lm.server --model mlx-community/Qwen3.5-35B-A3B-4bit --port 8001 \
+# enable_thinking:false matches the team's agreed setting (see teammate's
+# mlx_lm.server invocation observed on the shared host); worker is bf16
+# (not quantized) to match their precision too.
+mlx_lm.server --model mlx-community/Qwen3.5-35B-A3B-4bit --port 8011 \
+  --chat-template-args '{"enable_thinking": false}' \
   > logs/mlx_root.log 2>&1 &
 echo "root server pid $!"
 
-mlx_lm.server --model mlx-community/Qwen3.5-2B-MLX-8bit --port 8002 \
+mlx_lm.server --model mlx-community/Qwen3.5-2B-bf16 --port 8002 \
+  --chat-template-args '{"enable_thinking": false}' \
   > logs/mlx_worker.log 2>&1 &
 echo "worker server pid $!"
 

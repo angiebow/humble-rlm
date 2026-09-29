@@ -5,6 +5,6 @@ mode: gate
 models:
   root: openai/qwen35-root
   worker: openai/qwen35-worker
-router: {enabled: true}
+router: {enabled: true, method: logprob, tau_route: 0.75}
 relevance: {enabled: false}
 stopping: {enabled: false}

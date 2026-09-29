@@ -22,10 +22,12 @@ rlm:
 
 router:                 # Stage 0: direct vs recurse (P(IK)-inspired)
   enabled: true
+  method: rule                # rule | verbalized | logprob (see router.py docstring)
   direct_max_tokens: 100000   # contexts larger than this always recurse
-  use_self_assessment: false  # extra LLM call on a context preview
+  use_self_assessment: false  # legacy alias for method: verbalized
   preview_chars: 4000
-  tau_route: 0.7              # [SWEEP] min self-assessed P(direct succeeds)
+  logprob_probe_max_tokens: 64  # method: logprob only -- length of the probe answer
+  tau_route: 0.7              # [SWEEP] min P(IK) / P(direct succeeds)
 
 relevance:              # Stage 1: cosine prefilter -> cross-encoder reranker
   enabled: true

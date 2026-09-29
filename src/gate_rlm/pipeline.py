@@ -115,7 +115,21 @@ def run_example(example: dict, cfg: dict, scorer, seed: int) -> Dict[str, Any]:
         record["route_reason"] = decision.reason
         record["p_direct"] = decision.p_direct
 
-        if decision.route == "direct":
+        if decision.route == "direct" and decision.direct_answer is not None:
+            # logprob P(IK) probe already generated the answer; no 2nd call.
+            usage = decision.aux_usage or {}
+            out = {
+                "answer": decision.direct_answer,
+                "latency_s": 0.0,
+                "prompt_tokens": int(usage.get("prompt_tokens", 0) or 0),
+                "completion_tokens": int(usage.get("completion_tokens", 0) or 0),
+                "cost_usd": usage.get("cost_usd"),
+                "llm_calls": 1,
+                "leaf_calls": 0,
+                "root_iterations": 1,
+            }
+            decision.aux_usage = None  # already folded into out, don't double-count below
+        elif decision.route == "direct":
             out = run_direct(example["query"], example["context"], cfg)
         else:
             out = run_rlm(example, cfg, scorer)
