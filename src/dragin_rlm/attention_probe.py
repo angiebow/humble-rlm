@@ -100,9 +100,28 @@ def _patch_attention_layer(
     Returns (attn_cls, original_call) so the caller can restore exactly:
     ``attn_cls.__call__ = original_call``.
 
-    Reimplements mlx_lm.models.qwen3_next.Qwen3NextAttention.__call__.
+    Computes the real output via the SAME fused kernel the original
+    implementation uses (mlx_lm.models.base.scaled_dot_product_attention,
+    O(L) memory) rather than reimplementing that computation by hand. Only the
+    softmax attention weights for the LAST query position are computed
+    manually (O(S) memory) -- the only row generate_with_probe ever reads
+    (``probs[0, :, -1, :]``, since RIND/QFS only ever care about the token
+    just generated). An earlier version manually recomputed the FULL L x S
+    attention matrix to get that one row, which is exactly the O(L*S)
+    materialization the fused kernel exists to avoid: for BrowseComp-Plus's
+    multi-thousand-token documents during the prefill step (L == S == prompt
+    length), that allocation reliably exceeded even Metal's ~167GB buffer
+    limit (observed: "Attempting to allocate 211645384832 bytes" on a real
+    run). No causal mask is needed for the last-position row: in a causal
+    sequence the LAST query position is always allowed to attend to every key
+    that exists (nothing comes after it to mask out).
+
+    Reimplements the READOUT PATH only; mlx_lm.models.qwen3_next.
+    Qwen3NextAttention.__call__ itself is delegated to unchanged (via
+    scaled_dot_product_attention) for the actual output.
     """
     import mlx.core as mx
+    from mlx_lm.models.base import scaled_dot_product_attention
 
     attn = layer.self_attn
     attn_cls = type(attn)
@@ -136,40 +155,30 @@ def _patch_attention_layer(
             queries = self.rope(queries)
             keys = self.rope(keys)
 
+        output = scaled_dot_product_attention(
+            queries, keys, values, cache=cache, scale=self.scale, mask=mask
+        )
+
         n_kv_heads = keys.shape[1]
         n_repeats = self.num_attention_heads // n_kv_heads
         S = keys.shape[2]
+        q_last = queries[:, :, -1:, :]  # (B, H, 1, D) -- only row ever read
 
         if n_repeats > 1:
-            q4 = queries.reshape(B, n_kv_heads, n_repeats, L, -1)
+            q_last4 = q_last.reshape(B, n_kv_heads, n_repeats, 1, -1)
             k4 = mx.expand_dims(keys, 2)
-            v4 = mx.expand_dims(values, 2)
-            scores = (q4 * self.scale) @ k4.swapaxes(-1, -2)
+            last_scores = (q_last4 * self.scale) @ k4.swapaxes(-1, -2)
+            last_probs = mx.softmax(
+                last_scores.astype(mx.float32), axis=-1
+            ).astype(last_scores.dtype)
+            last_probs = last_probs.reshape(B, self.num_attention_heads, 1, S)
         else:
-            scores = (queries * self.scale) @ keys.swapaxes(-1, -2)
+            last_scores = (q_last * self.scale) @ keys.swapaxes(-1, -2)
+            last_probs = mx.softmax(
+                last_scores.astype(mx.float32), axis=-1
+            ).astype(last_scores.dtype)
 
-        if L > 1:
-            # Causal mask derived from shapes alone -- correct for both the
-            # prefill step (L == prompt length) and any future multi-token
-            # step, regardless of whatever mask object the caller passed in
-            # (we ignore it deliberately; see module docstring).
-            offset = S - L
-            rinds = mx.arange(S)
-            linds = mx.arange(offset, offset + L)[:, None]
-            causal = linds >= rinds[None]
-            neg_inf = mx.array(-1e9, dtype=scores.dtype)
-            scores = mx.where(causal, scores, neg_inf)
-
-        probs = mx.softmax(scores.astype(mx.float32), axis=-1).astype(scores.dtype)
-
-        if n_repeats > 1:
-            output = (probs @ v4).reshape(B, self.num_attention_heads, L, -1)
-            probs_full = probs.reshape(B, self.num_attention_heads, L, S)
-        else:
-            output = probs @ values
-            probs_full = probs
-
-        on_probs(probs_full)
+        on_probs(last_probs)
 
         output = output.transpose(0, 2, 1, 3).reshape(B, L, -1)
         return self.o_proj(output * mx.sigmoid(gate))
