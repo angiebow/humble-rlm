@@ -127,6 +127,18 @@ def run_dragin(
     segments_run = 0
     budget = cfg.generate_length
 
+    # Diagnostic: S_RIND is computed for every checkable token regardless of
+    # whether it crosses theta, so tracking the max seen (and which of the
+    # three factors it came from) is free -- no extra generation needed. Use
+    # this to calibrate theta from real score distributions before trusting
+    # any run's retrieval count: a threshold picked without knowing the real
+    # range a model/task actually produces is indistinguishable from a
+    # disabled trigger (see docs/PLAN.md / DRAGIN_RLM_TEST_RESULTS.md).
+    max_rind_score = 0.0
+    max_rind_detail: Optional[Dict[str, Any]] = None
+    rind_checked_tokens = 0
+    rind_nonstopword_tokens = 0
+
     while budget > 0 and len(triggers) <= cfg.max_triggers:
         segments_run += 1
         stream = generate_with_probe(
@@ -139,9 +151,22 @@ def run_dragin(
                 generated_text += probed.text
                 total_new_tokens += 1
                 budget -= 1
-                if idx is not None and state.score_at(idx) > cfg.theta:
-                    triggered_at = idx
-                    break
+                if idx is not None:
+                    score = state.score_at(idx)
+                    rind_checked_tokens += 1
+                    if state.semantic[idx]:
+                        rind_nonstopword_tokens += 1
+                    if score > max_rind_score:
+                        max_rind_score = score
+                        max_rind_detail = {
+                            "token": state.tokens[idx],
+                            "entropy": state.entropies[idx],
+                            "max_attn": state.max_attn[idx],
+                            "semantic": state.semantic[idx],
+                        }
+                    if score > cfg.theta:
+                        triggered_at = idx
+                        break
                 if ANSWER_CUE in generated_text or budget <= 0:
                     break
         finally:
@@ -200,4 +225,8 @@ def run_dragin(
         "rind_triggers": triggers,
         "theta": cfg.theta,
         "top_n": cfg.top_n,
+        "max_rind_score": max_rind_score,
+        "max_rind_detail": max_rind_detail,
+        "rind_checked_tokens": rind_checked_tokens,
+        "rind_nonstopword_tokens": rind_nonstopword_tokens,
     }
