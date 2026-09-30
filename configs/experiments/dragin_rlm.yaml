@@ -30,6 +30,11 @@ dragin:
                           # (see DRAGIN_RLM_TEST_RESULTS.md), so accuracy there was
                           # dominated by truncated reasoning, not model correctness
   max_triggers: 8        # safety cap on retrieval count; the paper leaves this unbounded
+  min_answer_tokens: 128 # guaranteed, trigger-immune budget for the final answer
+                          # pass once max_triggers is reached -- fixes the theta=0.0001
+                          # smoke test where every segment (including the last) got cut
+                          # off after ~2 tokens, so both runs ended with a bare "<think>"
+                          # and no answer at all (see DRAGIN_RLM_TEST_RESULTS.md)
   retrieval_top_k: 3     # passages handed to the worker per trigger
   passage_chars: 1000
   temperature: 0.0

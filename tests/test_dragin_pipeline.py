@@ -33,6 +33,7 @@ def test_dragin_config_from_cfg_reads_the_dragin_block():
     assert dcfg.worker_model == "openai/qwen35-worker"
     assert dcfg.theta == 0.0001
     assert dcfg.top_n == 25
+    assert dcfg.min_answer_tokens == 128
 
 
 def test_run_example_success_path(monkeypatch):

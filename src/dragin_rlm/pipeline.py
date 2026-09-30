@@ -21,6 +21,7 @@ def dragin_config_from_cfg(cfg: dict) -> DraginConfig:
         top_n=d.get("top_n", 25),
         generate_length=d.get("generate_length", 256),
         max_triggers=d.get("max_triggers", 8),
+        min_answer_tokens=d.get("min_answer_tokens", 128),
         retrieval_top_k=d.get("retrieval_top_k", 3),
         passage_chars=d.get("passage_chars", 1000),
         temperature=d.get("temperature", 0.0),

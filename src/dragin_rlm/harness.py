@@ -83,6 +83,14 @@ class DraginConfig:
     top_n: int = 25              # QFS query length (paper Table 9 range: 25-35)
     generate_length: int = 256   # total root tokens budget across all segments
     max_triggers: int = 8        # safety cap; the paper has no bound on retrieval count
+    min_answer_tokens: int = 128 # guaranteed, trigger-immune budget for the final
+                                  # answer pass once max_triggers is reached -- tops
+                                  # up whatever's left of generate_length if it's
+                                  # smaller than this. Without it, a low enough theta
+                                  # makes every segment (including the last) get cut
+                                  # off after a couple of tokens, so the run ends with
+                                  # no answer at all regardless of remaining budget
+                                  # (see DRAGIN_RLM_TEST_RESULTS.md, theta=0.0001).
     retrieval_top_k: int = 3     # passages handed to the worker per trigger
     passage_chars: int = 1000
     temperature: float = 0.0
@@ -156,7 +164,7 @@ def run_dragin(
     rind_checked_tokens = 0
     rind_nonstopword_tokens = 0
 
-    while budget > 0 and len(triggers) <= cfg.max_triggers:
+    while budget > 0 and len(triggers) < cfg.max_triggers:
         segments_run += 1
         stream = generate_with_probe(
             model, tokenizer, prompt, max_tokens=budget, temperature=cfg.temperature
@@ -192,9 +200,6 @@ def run_dragin(
         if triggered_at is None:
             break  # finished naturally: EOS, answer cue seen, or budget exhausted
 
-        if len(triggers) >= cfg.max_triggers:
-            break
-
         keep_chars = sum(len(t) for t in state.tokens[:triggered_at])
         generated_text = generated_text[:keep_chars]
         prior_tokens = state.tokens[:triggered_at]
@@ -227,6 +232,28 @@ def run_dragin(
             query=query,
             prefix=generated_text,
         )
+
+    # max_triggers reached with no answer cue yet: a further RIND trigger here
+    # can't lead to another retrieval, so checking theta at all would only cut
+    # this pass off after a token or two and discard it for nothing -- give the
+    # model one uninterrupted shot at finishing, with at least min_answer_tokens
+    # even if generate_length's shared budget is already spent (see
+    # DRAGIN_RLM_TEST_RESULTS.md, theta=0.0001: every segment including this one
+    # was getting cut at ~2 tokens, so the run ended with literally no answer).
+    if len(triggers) >= cfg.max_triggers and ANSWER_CUE not in generated_text:
+        segments_run += 1
+        final_budget = max(budget, cfg.min_answer_tokens)
+        stream = generate_with_probe(
+            model, tokenizer, prompt, max_tokens=final_budget, temperature=cfg.temperature
+        )
+        try:
+            for probed in stream:
+                generated_text += probed.text
+                total_new_tokens += 1
+                if ANSWER_CUE in generated_text:
+                    break
+        finally:
+            stream.close()
 
     answer = _extract_answer(generated_text)
     latency = time.perf_counter() - t0
