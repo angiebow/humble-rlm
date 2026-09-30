@@ -67,6 +67,10 @@ def main() -> None:
         ]
         df["semantic_correct"] = df["semantic_sim"] >= args.semantic_threshold
 
+    # correct / semantic_correct are boolean pass/fail indicators derived from
+    # answer + gold_answer, which are both already in the table -- dropped
+    # from the CSV so the table shows the actual answers to compare, not a
+    # verdict; accuracy/semantic_accuracy are still printed below from df.
     cols = [
         c
         for c in (
@@ -74,10 +78,8 @@ def main() -> None:
             "qid",
             "gold_answer",
             "answer",
-            "correct",
             "f1",
             "semantic_sim",
-            "semantic_correct",
             "latency_s",
             "completion_tokens",
             "n_retrievals",
@@ -97,17 +99,17 @@ def main() -> None:
     pd.set_option("display.max_colwidth", 60)
     print(table.to_string(index=False))
     print(f"\n{len(table)} questions -> {out}")
-    if len(table):
+    if len(df):
         semantic = (
-            f"  semantic_accuracy: {table['semantic_correct'].mean():.3f}"
+            f"  semantic_accuracy: {df['semantic_correct'].mean():.3f}"
             f" (threshold={args.semantic_threshold})"
-            if "semantic_correct" in table.columns
+            if "semantic_correct" in df.columns
             else ""
         )
         print(
-            f"accuracy: {table['correct'].mean():.3f}{semantic}  "
-            f"latency p50: {table['latency_s'].median():.1f}s  "
-            f"latency p95: {table['latency_s'].quantile(0.95):.1f}s"
+            f"accuracy: {df['correct'].mean():.3f}{semantic}  "
+            f"latency p50: {df['latency_s'].median():.1f}s  "
+            f"latency p95: {df['latency_s'].quantile(0.95):.1f}s"
         )
 
 

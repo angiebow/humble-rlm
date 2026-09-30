@@ -11,17 +11,18 @@ models:
   worker: openai/qwen35-worker   # sub-call answering over a QFS-selected slice; regular litellm/REST
 dragin:
   model_path: "mlx-community/Qwen3.5-35B-A3B-4bit"  # root; loaded directly, no litellm alias
-  theta: 0.003           # [SWEEP] RIND trigger threshold. Paper Table 9 suggests 0.6-1.5,
+  theta: 0.0001          # [SWEEP] RIND trigger threshold. Paper Table 9 suggests 0.6-1.5,
                           # but that's calibrated on ~200-1500-token contexts (Wikipedia
                           # passages, generate_length 64-128); BrowseComp-Plus documents run
                           # to 80k+ tokens, and softmax attention weights (a_max, one factor
                           # of S_RIND) shrink with the number of competing key positions.
                           # Measured directly on a real 10-question sample10c diagnostic run
                           # (threshold_diagnostic.py): max S_RIND per question ranged
-                          # 0.0013-0.0040 (p50=0.0028, p75=0.0031) -- theta=1.0 was ~250x
-                          # above the highest score ever observed, so nothing ever triggered.
-                          # 0.003 sits at the p50-p75 line: expected to fire for roughly half
-                          # of real questions, not none and not all of them.
+                          # 0.0013-0.0040 (p50=0.0028, p75=0.0031). theta=0.003 (p50-p75 line)
+                          # only triggered on 4/10 questions and didn't move accuracy; lowered
+                          # further to 0.0001 (below the observed min) to push retrieval rate
+                          # toward "fires on nearly every question" and see whether accuracy
+                          # responds at all at the high end of recursion frequency.
   top_n: 25              # QFS query length in tokens (paper Table 9: 25-35)
   generate_length: 768   # total root-token budget across all segments -- was 256;
                           # every question in the first 50-question sample50 run
