@@ -33,6 +33,9 @@ pik-sample50: ## run P(IK)-RLM against the 50-question sample (needs MLX bridge 
 pik-sample50-eval: ## accuracy + inference-time table for the sample50 run
 	$(PY) eval/aggregate.py --runs $(RUNS)/pik_rlm__browsecomp_sample50.jsonl --out results/table_pik_sample50.csv
 
+pik-sample50-per-question: ## per-question accuracy + latency (not aggregated) for the pik sample50 run
+	$(PY) eval/per_question.py --runs $(RUNS)/pik_rlm__browsecomp_sample50.jsonl --out results/table_pik_per_question.csv
+
 # --- DRAGIN-RLM (src/dragin_rlm/): separate construction, needs direct mlx-lm
 # access on the machine with the model weights (see experiments/run_dragin.py).
 # Not part of the litellm/MLX-bridge path above -- run it there directly:
@@ -42,6 +45,9 @@ dragin-sample50: ## run DRAGIN-RLM against the 50-question sample (loads the mod
 
 dragin-sample50-eval: ## accuracy + inference-time table for a dragin_rlm sample50 run
 	$(PY) eval/aggregate.py --runs $(RUNS)/dragin_rlm__browsecomp_sample50.jsonl --out results/table_dragin_sample50.csv
+
+dragin-sample50-per-question: ## per-question accuracy + latency (not aggregated) for the dragin sample50 run
+	$(PY) eval/per_question.py --runs $(RUNS)/dragin_rlm__browsecomp_sample50.jsonl --out results/table_dragin_per_question.csv
 
 setup: ## install the package and dependencies
 	$(PY) -m pip install -e ".[dev,tokens]"
@@ -79,5 +85,5 @@ eval: ## main table, RQ3 breakdown, paired tests, figures
 	$(PY) eval/plots.py
 
 .PHONY: help setup test data smoke observe-val sweep signals test-runs ablations eval \
-	browsecomp-data browsecomp-sample50 pik-sample50 pik-sample50-eval \
-	dragin-sample50 dragin-sample50-eval
+	browsecomp-data browsecomp-sample50 pik-sample50 pik-sample50-eval pik-sample50-per-question \
+	dragin-sample50 dragin-sample50-eval dragin-sample50-per-question
