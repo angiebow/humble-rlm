@@ -60,6 +60,15 @@ def run_example(
             tmp = Path(checkpoint_path).with_suffix(".tmp")
             tmp.write_text(json.dumps(ckpt, ensure_ascii=False))
             tmp.replace(checkpoint_path)  # atomic -- never leaves a half-written file
+            # Otherwise a single question (up to max_triggers retrievals, each
+            # possibly minutes long) can run for an hour+ with zero visible
+            # output -- this is the only progress signal during that stretch.
+            print(
+                f"  [{record['qid']}] retrieval {partial['n_retrievals']}, "
+                f"{partial['completion_tokens']} tokens so far, "
+                f"{partial['latency_s']:.0f}s elapsed",
+                flush=True,
+            )
 
     try:
         dcfg = dragin_config_from_cfg(cfg)

@@ -81,10 +81,12 @@ def test_checkpoint_written_per_retrieval_and_merged_with_record(tmp_path):
 
     def run_dragin_with_checkpoints(query, context, dcfg, model=None, tokenizer=None, on_checkpoint=None):
         # Simulate two retrievals, each checkpointing before the question finishes --
-        # this is what a kill between them should leave recoverable on disk.
-        on_checkpoint({"answer": "", "n_retrievals": 1, "partial": True})
-        on_checkpoint({"answer": "", "n_retrievals": 2, "partial": True})
-        return {"answer": "3,677", "n_retrievals": 2, "partial": False}
+        # this is what a kill between them should leave recoverable on disk. Shaped
+        # like a real harness.py partial (same keys _build_result always includes),
+        # since pipeline.py's on_checkpoint prints a progress line off these fields.
+        on_checkpoint({"answer": "", "n_retrievals": 1, "completion_tokens": 10, "latency_s": 5.0, "partial": True})
+        on_checkpoint({"answer": "", "n_retrievals": 2, "completion_tokens": 20, "latency_s": 9.0, "partial": True})
+        return {"answer": "3,677", "n_retrievals": 2, "completion_tokens": 25, "latency_s": 12.0, "partial": False}
 
     import json
     from unittest import mock
