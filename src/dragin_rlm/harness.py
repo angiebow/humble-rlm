@@ -121,13 +121,32 @@ def _call_worker(worker_model: str, query: str, passages: str) -> str:
     return (resp.choices[0].message.content or "").strip()
 
 
-def _extract_answer(text: str) -> str:
+def _extract_answer(text: str, worker_fallback: str = "") -> Tuple[str, str]:
     """Same "So the answer is" extraction convention the paper's own evaluation
-    uses (Appendix B), reused here for BrowseComp-Plus's short-answer format."""
+    uses (Appendix B), reused here for BrowseComp-Plus's short-answer format.
+
+    Returns (answer, source):
+      "cue"            -- a real short answer followed the cue phrase.
+      "raw_reasoning"  -- the root model wrote something but never reached
+                           (or finished) the cue, e.g. a cap cut it off
+                           mid-thought; the raw text is returned as-is.
+      "worker_fallback" -- the root model produced nothing at all (every
+                           retrieval truncated back to nothing, as happened
+                           on a real run -- see DRAGIN_RLM_TEST_RESULTS.md),
+                           so the most recent retrieval's own worker sub-call
+                           answer is used instead. That worker call already
+                           read real retrieved passages, which is still
+                           better-grounded than an empty string.
+    """
     if ANSWER_CUE in text:
         tail = text.split(ANSWER_CUE, 1)[1]
-        return tail.strip(" :\n").split("\n")[0].strip()
-    return text.strip()
+        extracted = tail.strip(" :\n").split("\n")[0].strip()
+        if extracted:
+            return extracted, "cue"
+    stripped = text.strip()
+    if stripped:
+        return stripped, "raw_reasoning"
+    return worker_fallback, "worker_fallback"
 
 
 def _cue_line_complete(text: str) -> bool:
@@ -157,8 +176,11 @@ def _build_result(
 ) -> Dict[str, Any]:
     """Shared by the final return and every checkpoint call so the two can
     never drift out of sync with each other."""
+    worker_fallback = triggers[-1]["worker_answer"] if triggers else ""
+    answer, answer_source = _extract_answer(generated_text, worker_fallback)
     return {
-        "answer": _extract_answer(generated_text),
+        "answer": answer,
+        "answer_source": answer_source,
         "raw_generation": generated_text,
         "latency_s": time.perf_counter() - t0,
         "completion_tokens": total_new_tokens,

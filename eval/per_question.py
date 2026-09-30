@@ -78,6 +78,7 @@ def main() -> None:
             "qid",
             "gold_answer",
             "answer",
+            "answer_source",
             "f1",
             "semantic_sim",
             "latency_s",
