@@ -34,6 +34,7 @@ def test_dragin_config_from_cfg_reads_the_dragin_block():
     assert dcfg.theta == 0.001
     assert dcfg.top_n == 25
     assert dcfg.max_retrieval_seconds == 600.0
+    assert dcfg.max_triggers == 20
 
 
 def test_run_example_success_path(monkeypatch):

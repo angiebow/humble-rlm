@@ -84,11 +84,19 @@ class DraginConfig:
     generate_length: int = 256   # total root tokens budget across all segments
     max_retrieval_seconds: float = 600.0  # wall-clock cap per retrieval cycle (root
                                   # generation to the trigger + worker sub-call +
-                                  # next-prompt rebuild). No cap on retrieval COUNT --
-                                  # the paper leaves that unbounded too -- but the first
-                                  # retrieval cycle that takes longer than this many
-                                  # seconds is treated as the last one; no further
-                                  # triggers are allowed after it.
+                                  # next-prompt rebuild) -- the first retrieval cycle
+                                  # that takes longer than this many seconds is treated
+                                  # as the last one; no further triggers are allowed
+                                  # after it.
+    max_triggers: int = 20       # cap on total retrieval count per question; the paper
+                                  # leaves this unbounded, but an all-fast-retrievals run
+                                  # could otherwise go on indefinitely under the time cap
+                                  # alone (observed: 24+ retrievals, still climbing, on a
+                                  # single question -- see DRAGIN_RLM_TEST_RESULTS.md).
+                                  # Whichever cap (this or max_retrieval_seconds) is hit
+                                  # first stops triggering; either way nothing extra is
+                                  # generated afterward -- whatever's in generated_text
+                                  # at that point is recorded as-is.
     retrieval_top_k: int = 3     # passages handed to the worker per trigger
     passage_chars: int = 1000
     temperature: float = 0.0
@@ -174,7 +182,7 @@ def run_dragin(
     rind_nonstopword_tokens = 0
 
     time_capped = False
-    while budget > 0:
+    while budget > 0 and len(triggers) < cfg.max_triggers:
         segments_run += 1
         seg_start = time.perf_counter()
         stream = generate_with_probe(
