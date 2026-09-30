@@ -39,13 +39,9 @@ dragin:
                           # on retrieval COUNT -- the paper leaves that unbounded too.
                           # The first retrieval cycle (root generation to the trigger +
                           # worker call + next-prompt rebuild) that takes longer than
-                          # this is treated as the last one allowed.
-  min_answer_tokens: 128 # guaranteed, trigger-immune budget for the final answer
-                          # pass once the retrieval-time cap is hit -- fixes the
-                          # theta=0.0001 smoke test where every segment (including the
-                          # last) got cut off after ~2 tokens, so both runs ended with
-                          # a bare "<think>" and no answer at all (see
-                          # DRAGIN_RLM_TEST_RESULTS.md)
+                          # this is treated as the last one allowed -- no extra
+                          # generation pass after it, whatever's been generated so far
+                          # is extracted and recorded as-is.
   retrieval_top_k: 3     # passages handed to the worker per trigger
   passage_chars: 1000
   temperature: 0.0

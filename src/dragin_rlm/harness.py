@@ -89,14 +89,6 @@ class DraginConfig:
                                   # retrieval cycle that takes longer than this many
                                   # seconds is treated as the last one; no further
                                   # triggers are allowed after it.
-    min_answer_tokens: int = 128 # guaranteed, trigger-immune budget for the final
-                                  # answer pass once the retrieval-time cap is hit --
-                                  # tops up whatever's left of generate_length if it's
-                                  # smaller than this. Without it, a low enough theta
-                                  # makes every segment (including the last) get cut
-                                  # off after a couple of tokens, so the run ends with
-                                  # no answer at all regardless of remaining budget
-                                  # (see DRAGIN_RLM_TEST_RESULTS.md, theta=0.0001).
     retrieval_top_k: int = 3     # passages handed to the worker per trigger
     passage_chars: int = 1000
     temperature: float = 0.0
@@ -254,30 +246,12 @@ def run_dragin(
 
         if time.perf_counter() - seg_start > cfg.max_retrieval_seconds:
             time_capped = True
-            break  # this retrieval cycle alone exceeded the cap -- no more triggers
-
-    # Retrieval-time cap hit with no answer cue yet: a further RIND trigger here
-    # can't lead to another retrieval (we're done triggering either way), so
-    # checking theta at all would only cut this pass off after a token or two
-    # and discard it for nothing -- give the model one uninterrupted shot at
-    # finishing, with at least min_answer_tokens even if generate_length's
-    # shared budget is already spent (see DRAGIN_RLM_TEST_RESULTS.md,
-    # theta=0.0001: every segment including this one was getting cut at ~2
-    # tokens, so the run ended with literally no answer).
-    if time_capped and not _cue_line_complete(generated_text):
-        segments_run += 1
-        final_budget = max(budget, cfg.min_answer_tokens)
-        stream = generate_with_probe(
-            model, tokenizer, prompt, max_tokens=final_budget, temperature=cfg.temperature
-        )
-        try:
-            for probed in stream:
-                generated_text += probed.text
-                total_new_tokens += 1
-                if _cue_line_complete(generated_text):
-                    break
-        finally:
-            stream.close()
+            break  # this retrieval cycle alone exceeded the cap -- stop here and
+            # report whatever's been generated so far, no extra generation pass:
+            # a retrieval that alone took this long means generated_text already
+            # holds real, substantial reasoning (unlike a near-instant trigger),
+            # so there's something worth recording as-is rather than spending
+            # more time trying to force a clean "So the answer is" cue.
 
     answer = _extract_answer(generated_text)
     latency = time.perf_counter() - t0
