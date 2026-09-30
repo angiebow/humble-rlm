@@ -8,6 +8,13 @@ row-level view underneath that rollup.
 
     python eval/per_question.py --runs results/runs/dragin_rlm__browsecomp_sample50.jsonl \
         --out results/table_dragin_per_question.csv
+
+Pass --semantic to add a semantic-similarity column (cosine similarity of
+sentence embeddings) alongside exact_match/contains_match's is_correct --
+useful when the answer field is a long, unfinished reasoning chain rather
+than a clean short string (contains_match still catches a verbatim-but-
+buried gold string; it can't catch a paraphrase). Off by default since it
+loads an embedding model.
 """
 
 from __future__ import annotations
@@ -20,7 +27,7 @@ from pathlib import Path
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from eval.metrics import f1, is_correct  # noqa: E402
+from eval.metrics import f1, is_correct, semantic_correct, semantic_similarity  # noqa: E402
 
 
 def load(paths) -> pd.DataFrame:
@@ -36,6 +43,16 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--runs", nargs="+", required=True)
     ap.add_argument("--out", default="results/table_per_question.csv")
+    ap.add_argument(
+        "--semantic", action="store_true", help="add semantic_sim / semantic_correct columns"
+    )
+    ap.add_argument(
+        "--semantic-threshold",
+        type=float,
+        default=0.75,
+        help="cosine similarity >= this counts as semantic_correct",
+    )
+    ap.add_argument("--semantic-model", default="BAAI/bge-small-en-v1.5")
     args = ap.parse_args()
 
     df = load(args.runs)
@@ -43,6 +60,12 @@ def main() -> None:
         is_correct(a or "", g, d) for a, g, d in zip(df.answer, df.gold_answer, df.dataset)
     ]
     df["f1"] = [f1(a or "", g) for a, g in zip(df.answer, df.gold_answer)]
+    if args.semantic:
+        df["semantic_sim"] = [
+            semantic_similarity(a or "", g, args.semantic_model)
+            for a, g in zip(df.answer, df.gold_answer)
+        ]
+        df["semantic_correct"] = df["semantic_sim"] >= args.semantic_threshold
 
     cols = [
         c
@@ -53,6 +76,8 @@ def main() -> None:
             "answer",
             "correct",
             "f1",
+            "semantic_sim",
+            "semantic_correct",
             "latency_s",
             "completion_tokens",
             "n_retrievals",
@@ -71,8 +96,14 @@ def main() -> None:
     print(table.to_string(index=False))
     print(f"\n{len(table)} questions -> {out}")
     if len(table):
+        semantic = (
+            f"  semantic_accuracy: {table['semantic_correct'].mean():.3f}"
+            f" (threshold={args.semantic_threshold})"
+            if "semantic_correct" in table.columns
+            else ""
+        )
         print(
-            f"accuracy: {table['correct'].mean():.3f}  "
+            f"accuracy: {table['correct'].mean():.3f}{semantic}  "
             f"latency p50: {table['latency_s'].median():.1f}s  "
             f"latency p95: {table['latency_s'].quantile(0.95):.1f}s"
         )

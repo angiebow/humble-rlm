@@ -34,7 +34,7 @@ pik-sample50-eval: ## accuracy + inference-time table for the sample50 run
 	$(PY) eval/aggregate.py --runs $(RUNS)/pik_rlm__browsecomp_sample50.jsonl --out results/table_pik_sample50.csv
 
 pik-sample50-per-question: ## per-question accuracy + latency (not aggregated) for the pik sample50 run
-	$(PY) eval/per_question.py --runs $(RUNS)/pik_rlm__browsecomp_sample50.jsonl --out results/table_pik_per_question.csv
+	$(PY) eval/per_question.py --runs $(RUNS)/pik_rlm__browsecomp_sample50.jsonl --out results/table_pik_per_question.csv --semantic
 
 # --- DRAGIN-RLM (src/dragin_rlm/): separate construction, needs direct mlx-lm
 # access on the machine with the model weights (see experiments/run_dragin.py).
@@ -47,7 +47,7 @@ dragin-sample50-eval: ## accuracy + inference-time table for a dragin_rlm sample
 	$(PY) eval/aggregate.py --runs $(RUNS)/dragin_rlm__browsecomp_sample50.jsonl --out results/table_dragin_sample50.csv
 
 dragin-sample50-per-question: ## per-question accuracy + latency (not aggregated) for the dragin sample50 run
-	$(PY) eval/per_question.py --runs $(RUNS)/dragin_rlm__browsecomp_sample50.jsonl --out results/table_dragin_per_question.csv
+	$(PY) eval/per_question.py --runs $(RUNS)/dragin_rlm__browsecomp_sample50.jsonl --out results/table_dragin_per_question.csv --semantic
 
 setup: ## install the package and dependencies
 	$(PY) -m pip install -e ".[dev,tokens]"
