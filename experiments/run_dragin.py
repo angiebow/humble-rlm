@@ -91,7 +91,7 @@ def main() -> None:
     if not args.skip_verify:
         from dragin_rlm.attention_probe import verify_against_fused
 
-        if not verify_against_fused(dcfg.model_path):
+        if not verify_against_fused(dcfg.model_path, model=model, tokenizer=tokenizer):
             print(
                 "REFUSING to run: the unfused-attention patch does not reproduce "
                 "the fused kernel's output on this model -- RIND scores would be "

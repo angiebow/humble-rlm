@@ -285,16 +285,25 @@ def verify_against_fused(
     model_path: str,
     prompt: str = "The quick brown fox jumps over the lazy dog. It then",
     atol: float = 1e-3,
+    model: Any = None,
+    tokenizer: Any = None,
 ) -> bool:
     """One-time sanity check: does the patched (unfused) attention layer produce
     the SAME end-to-end logits as the original fused kernel, given the same
     input? Run this once on real hardware -- and make it pass -- before trusting
     any RIND score from generate_with_probe. Not run automatically; call it from
     a script or REPL on the machine that actually has mlx + the model weights.
+
+    Pass an already-loaded ``model``/``tokenizer`` (e.g. from a caller that
+    also needs them for the real run right after) to avoid loading a second
+    full copy of a multi-billion-parameter model just for this check --
+    experiments/run_dragin.py does this. Loads its own if omitted, for
+    standalone use from a REPL.
     """
     import mlx.core as mx
 
-    model, tokenizer = load_dragin_model(model_path)
+    if model is None or tokenizer is None:
+        model, tokenizer = load_dragin_model(model_path)
     tokens = mx.array(tokenizer.encode(prompt))[None]
 
     from mlx_lm.models.cache import make_prompt_cache
