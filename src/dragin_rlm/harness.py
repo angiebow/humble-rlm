@@ -23,6 +23,23 @@ Mapping the paper's algorithm onto this project's setting:
     retrieved passages, resume) = truncate generated_text and RindState at the
     trigger index, build a new prompt with the passages inserted, start a new
     generate_with_probe segment that continues from the truncated text.
+
+Per-token decision, explicitly (three outcomes, one check):
+  S_RIND(t_i) > theta   -> RETRIEVE. Truncate at t_i, QFS-slice the context,
+                            worker sub-call, resume generation from t_i with
+                            the retrieved passage injected.
+  S_RIND(t_i) <= theta  -> CONTINUE. No action; the next token is generated
+                            normally. This is the common case for every token
+                            that isn't a trigger -- there is no per-token
+                            "stop" branch distinct from it.
+  natural end reached    -> STOP. EOS, the "So the answer is:" cue appears, or
+                            the generate_length budget runs out -- whichever
+                            comes first ends the loop and the response is
+                            returned as-is. High confidence throughout
+                            generation shows up as never triggering RETRIEVE,
+                            which is exactly what lets this reach STOP without
+                            ever invoking a worker sub-call -- there's no
+                            separate proactive-early-stop path beyond that.
 """
 
 from __future__ import annotations
