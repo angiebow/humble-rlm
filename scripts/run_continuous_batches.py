@@ -12,13 +12,15 @@ Run it yourself, in your own terminal, from the repo root:
 Round 1 reuses whatever data/processed/browsecomp_batch10_round1_theta001.jsonl
 already exists (so a batch prepared and started by hand isn't re-drawn);
 every later round samples a fresh set of 10, excluding every qid used so far
-(tracked in data/processed/used_qids_theta001.txt, gitignored). The
+(tracked in data/processed/used_qids_theta001.txt, gitignored). Each question
+runs as its own run_dragin.py call (not the whole batch at once), so the
 consolidated per-question CSV (results/table_dragin_batch10_theta0.001_local_per_question.csv)
-is regenerated after every round, so you have a readable result on disk even
-if you stop the script (Ctrl-C) or it hits the deadline mid-round -- the
-current question's own progress is additionally checkpointed after every
-retrieval (harness.py's on_checkpoint), so at most one in-flight segment is
-ever at risk, never a whole question.
+updates right after every question finishes, not only once all 10 in a
+round are done -- a single question can take 20-90+ min. Within a question,
+every retrieval prints a live progress line (qid, retrieval count, tokens,
+elapsed) and checkpoints to disk (harness.py's on_checkpoint), so at most
+one in-flight segment is ever at risk, never a whole question, and you're
+never watching a silent terminal for an hour.
 
 Safe to run fully offline: this only ever talks to localhost (the worker
 server + proxy it starts) and reads already-downloaded files.
@@ -154,24 +156,34 @@ def main() -> None:
         save_used(used)
 
         out_path = RUNS_DIR / f"dragin_rlm__browsecomp_batch10_round{round_num}_theta0.001_local.jsonl"
-        run([
-            sys.executable, str(ROOT / "experiments/run_dragin.py"),
-            "--config", str(CONFIG),
-            "--data", str(batch_path),
-            "--split", "all",
-            "--out", str(out_path),
-        ])
-
         all_runs = sorted(
             RUNS_DIR.glob("dragin_rlm__browsecomp_batch10_round*_theta0.001_local.jsonl"),
             key=lambda p: p.name,
         )
-        run([
-            sys.executable, str(ROOT / "eval/per_question.py"),
-            "--runs", *[str(p) for p in all_runs],
-            "--out", str(CSV_OUT),
-            "--semantic",
-        ])
+        if out_path not in all_runs:
+            all_runs.append(out_path)
+
+        # One question per run_dragin.py call (not the whole batch at once)
+        # so the consolidated CSV updates right after each question finishes,
+        # not only after all 10 in the round are done -- a single question
+        # can take 20-90+ min, so that would otherwise be a long, silent wait.
+        one_question_path = ROOT / "data/processed/_one_question.jsonl"
+        for r in batch:
+            with one_question_path.open("w") as f:
+                f.write(json.dumps(r, ensure_ascii=False) + "\n")
+            run([
+                sys.executable, str(ROOT / "experiments/run_dragin.py"),
+                "--config", str(CONFIG),
+                "--data", str(one_question_path),
+                "--split", "all",
+                "--out", str(out_path),
+            ])
+            run([
+                sys.executable, str(ROOT / "eval/per_question.py"),
+                "--runs", *[str(p) for p in all_runs],
+                "--out", str(CSV_OUT),
+                "--semantic",
+            ])
 
         round_num += 1
 
