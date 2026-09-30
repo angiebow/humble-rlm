@@ -1,0 +1,11 @@
+qid,correct,f1,semantic_sim,semantic_correct,n_retrievals,root_iterations,latency_s
+browsecomp-1082,False,0.0,0.514662,False,1,2,163.958098
+browsecomp-1103,True,0.029851,0.644626,False,8,9,805.106876
+browsecomp-1152,False,0.0,0.636533,False,1,2,252.22576
+browsecomp-196,False,0.0,0.54033,False,0,1,81.43185
+browsecomp-305,False,0.0,0.618703,False,0,1,154.030988
+browsecomp-421,False,0.0,0.533407,False,0,1,99.850255
+browsecomp-539,False,0.0,0.520797,False,0,1,114.210909
+browsecomp-6,False,0.0,0.536844,False,8,9,1424.627411
+browsecomp-625,False,0.005013,0.483532,False,0,1,147.483693
+browsecomp-968,False,0.0,0.479269,False,1,2,260.907345

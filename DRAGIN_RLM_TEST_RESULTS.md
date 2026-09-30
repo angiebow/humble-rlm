@@ -82,12 +82,71 @@ names "**Luciana Lixandru**" mid-reasoning, matching gold — but neither exampl
 the "So the answer is:" cue within the token budget, so the extracted `answer` field is
 the raw unfinished reasoning rather than a clean short answer.
 
+## Full 50-question run (`theta: 1.0`, `generate_length: 256`)
+
+`results/table_dragin_sample50_theta1_0_per_question.csv`. **0 errors, 1h30m total
+(108s/question average).** `accuracy: 0.320`, `semantic_accuracy: 0.020`. Every single
+question exhausted the 256-token budget without reaching `"So the answer is:"`, and
+`n_retrievals = 0` for all 50 — `theta=1.0` never crossed once across 50 real questions.
+
+## `generate_length` raised to 768; theta still uncalibrated (10 questions, seed=17)
+
+`results/table_dragin_sample10c_theta1_0_per_question.csv` (predates the theta-tagged
+naming convention's introduction, but run under `theta=1.0`). Built a
+`threshold_diagnostic.py` report from this run's `max_rind_score` per question (tracked
+for free alongside the existing trigger check): scores ranged **0.0013–0.0040**
+(p50=0.0028, p75=0.0031) — `theta=1.0` was **~250x above the highest score ever
+observed**, confirming the zero-trigger result was pure threshold miscalibration, not a
+property of the model or task. Re-checked against the paper's own settings (Table 8/9):
+DRAGIN's evaluation contexts run a few hundred to ~1500 tokens (Wikipedia, top-k=3,
+100-token passages, generate_length 64–128) versus BrowseComp-Plus's 80K+-token
+documents — softmax attention weights (one factor of `S_RIND`) shrink with the number of
+competing key positions, so the paper's `theta ∈ [0.6, 1.5]` was never going to transfer
+numerically to this context-length regime.
+
+## Calibrated rerun (`theta: 0.003`, same 10 questions)
+
+`results/table_dragin_sample10c_theta0.003_per_question.csv`. `theta` set to the
+p50–p75 line of the measured distribution above. **0 errors, 58m25s total** (vs. ~20m for
+the same 10 questions at `theta=1.0`).
+
+| | theta=1.0 (no recursion) | theta=0.003 (recursion enabled) |
+|---|---|---|
+| accuracy | 0.100 | **0.100 (unchanged)** |
+| semantic_accuracy | 0.000 | 0.000 (unchanged) |
+| latency p50 | 118.1s | 159.0s (+35%) |
+| latency p95 | 165.2s | **1145.8s (+593%)** |
+
+**Real recursion happened for the first time** — 4 of 10 questions triggered at least
+once, 2 of them (`browsecomp-1103`, `browsecomp-6`) hit the `max_triggers: 8` safety cap
+(805.1s and 1424.6s respectively — each retrieval re-prefills the *entire* document from
+scratch with no KV-cache reuse across segments, so cost compounds with trigger count).
+**Accuracy did not move.** The single correct answer (`browsecomp-1103`) was already
+correct in the `theta=1.0` run before any retrieval happened; recursion never flipped a
+wrong answer to right, including the two 8-trigger cases. On this small sample, DRAGIN's
+gating fired on genuine uncertainty signal (mechanism confirmed working end-to-end) but
+that uncertainty didn't translate into better answers — cost went up substantially,
+outcomes didn't change. Whether that holds at a larger `n`, or whether the worker's
+answers on triggering questions are themselves the bottleneck (not the trigger timing),
+is the open question.
+
+A structural inefficiency, found while diagnosing why one question ran 46+ minutes: once
+`max_triggers` is reached, the loop's cap check only runs *after* one more full segment
+generates (`harness.py`'s `while budget > 0 and len(triggers) <= cfg.max_triggers`) —
+that final segment isn't aware it's over budget until it finishes on its own (finds
+another trigger, hits the answer cue, or exhausts the token budget). Not a correctness
+bug (trigger *count* still caps at exactly `max_triggers`, confirmed: both capped
+questions show `n_retrievals: 8` exactly), but it wastes one full prefill+generation
+cycle's worth of time. Worth moving the check to before starting a new segment rather
+than after.
+
 ## Open items (tuning, not bugs)
 
-- **`generate_length: 256`** (`configs/experiments/dragin_rlm.yaml`) is too short for this
-  reasoning style over long documents. The paper's own values (64–128) were tuned for a
-  much shorter, non-document-heavy setup. Try 512–1024.
-- **`theta: 1.0`** never triggered a RIND retrieval in either example — the trigger path
-  (QFS → BM25 slice → worker sub-call → resume) is implemented and error-free but still
-  unexercised on real data. Needs either a lower threshold or a look at the actual RIND
-  score distribution before concluding whether 1.0 is too high.
+- The `max_triggers` off-by-one above (real waste, not correctness-affecting).
+- `n=10` is too small to conclude recursion doesn't help at all — needs a larger
+  calibrated-theta run (the full 50, or another larger sample) before treating "accuracy
+  unchanged" as a stable finding rather than small-sample noise.
+- Worth inspecting the worker's actual answers on the 4 triggering questions directly —
+  if the worker itself isn't resolving the uncertainty (e.g. QFS's raw-subword-token
+  query, or BM25 slicing missing the relevant passage), that's a different fix than "theta
+  is still wrong."
