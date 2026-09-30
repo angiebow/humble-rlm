@@ -207,6 +207,52 @@ the 0.003 line (which produced real partial reasoning on the 35B model) fix
 this on the 4B/0.8B pairing too, or is a smaller root model simply worse at
 holding onto the actual instruction-following task once interrupted?
 
+## theta raised to 0.001; max_triggers cap replaced with time+count caps; checkpointing added
+
+Three harness changes landed together for this round: (1) `theta: 0.0001 ->
+0.001` (10x less aggressive, hoping to avoid the instruction-echoing failure
+above), (2) the retrieval cap changed from a pure trigger-count limit to
+`max_retrieval_seconds: 600` (10 min per retrieval cycle) **plus**
+`max_triggers: 20` as a second, independent stop condition -- a
+consistently-fast-retrieving question can otherwise trigger indefinitely
+under a time-only cap (observed directly: one question reached 24+
+retrievals, none individually slow, before being manually killed), and (3)
+the guaranteed final-pass mechanism was removed entirely -- whichever cap
+fires first, whatever's in `generated_text` at that moment is recorded
+as-is, no extra generation.
+
+That removal exposed a real gap the hard way: a long-running question
+(`browsecomp-279`) was killed mid-generation to apply a code fix, and its 24
+completed retrievals' worth of reasoning were unrecoverable -- nothing had
+been written to disk for that question yet, since `run_dragin.py` only
+persists a record after a question fully completes. Fixed by adding
+per-retrieval checkpointing (`run_dragin()`'s new `on_checkpoint` callback,
+wired through `pipeline.run_example()` to an atomically-written
+`<out>.checkpoint.json`, cleared once the real record lands in the output
+JSONL) -- worst case now is losing the current in-flight segment, not the
+whole question.
+
+**Results, 2 fresh questions (`browsecomp-1266` from the theta=0.0001 run
+above, re-included since it predates these harness changes; `browsecomp-279`,
+seed=101):**
+
+| qid | n_retrievals | root_iterations | answer | gold | semantic_sim |
+|---|---|---|---|---|---|
+| browsecomp-1266 | 8 (natural stop, cue found) | 9 | `Maryam Tanveer Ali<\|endoftext\|>...` | Maryam Tanveer Ali | 0.848 (semantic_correct) |
+| browsecomp-279 | 20 (hit max_triggers) | 20 | *(empty)* | Fort Smith Museum of History | 0.519 |
+
+`browsecomp-279`'s `raw_generation` was `"\n\n"` -- across all 20 retrievals,
+essentially nothing survived the post-trigger truncation each time (41 total
+completion tokens over 20 segments). `time_capped: False` confirms it hit
+the count cap, not the time cap -- each individual retrieval was fast, the
+model just kept re-triggering at almost the same early position every
+segment, the same "never accumulates real text" pattern seen at theta=0.0001,
+just recurring here on a different question at 10x higher theta. One of two
+questions reasoned genuinely to the correct answer; the other produced
+nothing at all. Small-n, but consistent with theta alone not being a clean
+dial -- some questions' uncertainty patterns cause this regardless of where
+theta sits in the 0.0001-0.001 range.
+
 ## Open items (tuning, not bugs)
 
 - The `max_triggers` off-by-one above (real waste, not correctness-affecting).

@@ -1,0 +1,3 @@
+config,qid,gold_answer,answer,f1,semantic_sim,latency_s,completion_tokens,n_retrievals,root_iterations,max_rind_score
+dragin_rlm,browsecomp-1266,Maryam Tanveer Ali,Maryam Tanveer Ali<|endoftext|><|im_start|>user,0.6666666666666666,0.8475523591041565,1619.538449042011,334,8,9,0.0016842140010114859
+dragin_rlm,browsecomp-279,Fort Smith Museum of History,,0.0,0.51891028881073,2487.4543759999797,41,20,20,0.0017859188878371207
