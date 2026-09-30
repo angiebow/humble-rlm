@@ -164,19 +164,21 @@ def _patch_attention_layer(
         S = keys.shape[2]
         q_last = queries[:, :, -1:, :]  # (B, H, 1, D) -- only row ever read
 
+        # Stays float32: this is never fed back into the model (only read out
+        # for RIND/QFS via on_probs -> generate_with_probe -> numpy), and
+        # mx.array's bfloat16 dtype has no numpy buffer-protocol equivalent --
+        # np.asarray() on a bf16 array raises ValueError: 'bfloat16' is not a
+        # valid PEP 3118 buffer format string. Casting back to the model's
+        # native dtype here (an earlier version did) reintroduces that crash.
         if n_repeats > 1:
             q_last4 = q_last.reshape(B, n_kv_heads, n_repeats, 1, -1)
             k4 = mx.expand_dims(keys, 2)
             last_scores = (q_last4 * self.scale) @ k4.swapaxes(-1, -2)
-            last_probs = mx.softmax(
-                last_scores.astype(mx.float32), axis=-1
-            ).astype(last_scores.dtype)
+            last_probs = mx.softmax(last_scores.astype(mx.float32), axis=-1)
             last_probs = last_probs.reshape(B, self.num_attention_heads, 1, S)
         else:
             last_scores = (q_last * self.scale) @ keys.swapaxes(-1, -2)
-            last_probs = mx.softmax(
-                last_scores.astype(mx.float32), axis=-1
-            ).astype(last_scores.dtype)
+            last_probs = mx.softmax(last_scores.astype(mx.float32), axis=-1)
 
         on_probs(last_probs)
 
@@ -223,7 +225,7 @@ def generate_with_probe(
         prompt_cache = make_prompt_cache(model)
 
         def step(input_tokens: Any) -> Tuple[Any, Any]:
-            logits = model(input_tokens[None], cache=prompt_cache)
+            logits = model(input_tokens[None], cache=prompt_cache).astype(mx.float32)
             logits = logits[:, -1, :]
             logprobs = logits - mx.logsumexp(logits, axis=-1, keepdims=True)
             token = sampler(logprobs)
