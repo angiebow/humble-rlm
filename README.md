@@ -172,12 +172,20 @@ root's own code.
 
 **Status:** the math (RIND, QFS, BM25 slicing) is implemented and unit-tested
 (`tests/test_dragin_*.py`, no mlx required). The mlx-lm integration
-(`attention_probe.py`, the unfused-attention patch) is written and reviewed against
-mlx-lm's source but has never been executed — this development environment has no Apple
-GPU access. **Before trusting any RIND score from a real run, call
-`dragin_rlm.attention_probe.verify_against_fused(model_path)` on the machine that
-actually has the model weights and confirm it prints PASS** — `experiments/run_dragin.py`
-does this automatically and refuses to run if it fails (`--skip-verify` to override).
+(`attention_probe.py`, the unfused-attention patch) is written, reviewed against mlx-lm's
+source, and validated on real Apple Silicon hardware (`verify_against_fused()` PASSes;
+see `DRAGIN_RLM_TEST_RESULTS.md` for the hardware bugs found and fixed along the way, plus
+real BrowseComp-Plus run results). **Before trusting any RIND score from a real run,
+confirm `verify_against_fused(model_path)` prints PASS on the machine that actually has
+the model weights** — `experiments/run_dragin.py` does this automatically and refuses to
+run if it fails (`--skip-verify` to override).
+
+`configs/experiments/dragin_rlm.yaml`'s `dragin.model_path` and `models.worker` are both
+swappable independent of each other: the root model is loaded directly (no litellm), the
+worker goes through `configs/litellm_proxy.yaml` -> `mlx_lm.server`. Currently set to
+Qwen3.5-4B (root) + Qwen3.5-0.8B (worker, both 4-bit) for local runs on a memory-limited
+Mac; the earlier hardware-validation runs (`DRAGIN_RLM_TEST_RESULTS.md`) used
+Qwen3.5-35B-A3B-4bit (root) + Qwen3.5-2B-bf16 (worker) on a 256GB machine.
 
 ```bash
 python experiments/run_dragin.py --config configs/experiments/dragin_rlm.yaml \
