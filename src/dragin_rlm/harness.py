@@ -124,6 +124,17 @@ def _extract_answer(text: str) -> str:
     return text.strip()
 
 
+def _cue_line_complete(text: str) -> bool:
+    """True once ANSWER_CUE has appeared AND a full line has been written after
+    it. Stopping the instant the cue substring itself appears (the previous
+    behavior) could cut generation off before the short answer was written --
+    confirmed on a real run: generation ended with "...So the answer is" and
+    nothing after it, so _extract_answer had nothing to return."""
+    if ANSWER_CUE not in text:
+        return False
+    return "\n" in text.split(ANSWER_CUE, 1)[1]
+
+
 def run_dragin(
     query: str,
     context: str,
@@ -192,7 +203,7 @@ def run_dragin(
                     if score > cfg.theta:
                         triggered_at = idx
                         break
-                if ANSWER_CUE in generated_text or budget <= 0:
+                if _cue_line_complete(generated_text) or budget <= 0:
                     break
         finally:
             stream.close()
@@ -240,7 +251,7 @@ def run_dragin(
     # even if generate_length's shared budget is already spent (see
     # DRAGIN_RLM_TEST_RESULTS.md, theta=0.0001: every segment including this one
     # was getting cut at ~2 tokens, so the run ended with literally no answer).
-    if len(triggers) >= cfg.max_triggers and ANSWER_CUE not in generated_text:
+    if len(triggers) >= cfg.max_triggers and not _cue_line_complete(generated_text):
         segments_run += 1
         final_budget = max(budget, cfg.min_answer_tokens)
         stream = generate_with_probe(
@@ -250,7 +261,7 @@ def run_dragin(
             for probed in stream:
                 generated_text += probed.text
                 total_new_tokens += 1
-                if ANSWER_CUE in generated_text:
+                if _cue_line_complete(generated_text):
                     break
         finally:
             stream.close()
