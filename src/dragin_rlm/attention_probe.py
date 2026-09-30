@@ -1,0 +1,261 @@
+"""Direct mlx-lm generation with per-token entropy + attention introspection.
+
+DRAGIN's RIND needs H_i (full-vocab entropy) and a_max(i) (self-attention from
+later tokens back to t_i, last transformer layer) at every generated token.
+Neither is obtainable through an OpenAI-compatible REST API -- mlx_lm.server only
+returns the chosen token's logprob, never attention weights, and the paper's own
+Limitations (§7) says as much: "our method is not applicable to certain APIs that
+do not provide access to the self-attention scores." So this module talks to
+mlx-lm directly, in-process, bypassing litellm and the REST bridge entirely for
+the root model. (The worker model, used only as a plain answer generator over an
+already-selected passage, stays on the regular litellm path -- see harness.py.)
+
+Two adaptations versus the paper, both specific to Qwen3.5-35B-A3B:
+
+1. HYBRID ATTENTION. mlx_lm.models.qwen3_5 / qwen3_5_moe is not a plain
+   Transformer: most decoder layers run GatedDeltaNet, a recurrent/SSM mechanism
+   with no pairwise attention matrix at all (DecoderLayer.is_linear). Only every
+   ``full_attention_interval``-th layer (config default 4) runs real softmax
+   self-attention (qwen3_next.Qwen3NextAttention). The paper's "last transformer
+   layer" (footnote 2) is reinterpreted here as the last layer that actually has
+   one -- see _find_last_attention_layer.
+2. UNFUSED ATTENTION. mlx-lm's attention path calls the fused
+   ``mx.fast.scaled_dot_product_attention`` kernel, which never materializes the
+   softmax(QK^T) matrix, so it can't be read after the fact. _patch_attention_layer
+   replaces that one layer's ``__call__`` at the INSTANCE level with an unfused
+   reimplementation (manual QK^T -> causal mask -> softmax -> matmul-V) that
+   reproduces mlx_lm.models.qwen3_next.Qwen3NextAttention.__call__ line for line
+   except for that one substitution -- re-check against mlx-lm's source if this
+   starts failing verify_against_fused(), since it will drift if mlx-lm's
+   attention implementation changes.
+
+IMPORTANT: do not drive this with ``mlx_lm.generate_step``. That generator
+computes step n+1 via ``mx.async_eval`` *before* yielding step n (latency hiding),
+so a naive "read the probe buffer after each yield" wrapper would silently
+capture the WRONG step's attention -- an off-by-one that would look like it works
+(no crash, plausible-looking numbers) while being wrong. generate_with_probe
+below runs its own synchronous, one-step-at-a-time loop instead, with no
+speculative lookahead, specifically so the probe buffer always matches the token
+just yielded.
+
+Run verify_against_fused() once on real hardware before trusting any RIND score
+this module produces -- it was written and reviewed against mlx-lm's source but
+never executed (this development environment has no mlx / Apple GPU access).
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any, Callable, Iterator, List, Tuple
+
+
+@dataclass
+class ProbedToken:
+    text: str
+    token_id: int
+    entropy: float
+    attn_row: List[float]  # this token's own attention back to positions [0, i)
+
+
+def _find_last_attention_layer(model: Any) -> Any:
+    """Highest-index decoder layer with real self-attention (is_linear False)."""
+    layers = model.layers
+    for layer in reversed(layers):
+        if not getattr(layer, "is_linear", False):
+            return layer
+    raise RuntimeError(
+        "No full-attention layer found on this model -- unexpected for the "
+        "Qwen3.5 family (every full_attention_interval-th layer should have one; "
+        "check model.args.text_config['full_attention_interval'])."
+    )
+
+
+def _patch_attention_layer(
+    layer: Any, on_probs: Callable[[Any], None]
+) -> Callable[..., Any]:
+    """Replace ``layer.self_attn.__call__`` with an unfused equivalent that
+    reports the softmax attention matrix via ``on_probs`` before returning
+    exactly the output the fused kernel would have. Returns the original bound
+    method so the caller can restore it (``attn.__call__ = original_call``).
+
+    Reimplements mlx_lm.models.qwen3_next.Qwen3NextAttention.__call__.
+    """
+    import mlx.core as mx
+
+    attn = layer.self_attn
+    original_call = attn.__call__
+
+    def patched_call(x, mask=None, cache=None):
+        B, L, D = x.shape
+        q_proj_output = attn.q_proj(x)
+        queries, gate = mx.split(
+            q_proj_output.reshape(B, L, attn.num_attention_heads, -1), 2, axis=-1
+        )
+        gate = gate.reshape(B, L, -1)
+        keys, values = attn.k_proj(x), attn.v_proj(x)
+
+        queries = attn.q_norm(queries).transpose(0, 2, 1, 3)
+        keys = attn.k_norm(
+            keys.reshape(B, L, attn.num_key_value_heads, -1)
+        ).transpose(0, 2, 1, 3)
+        values = values.reshape(B, L, attn.num_key_value_heads, -1).transpose(
+            0, 2, 1, 3
+        )
+
+        if cache is not None:
+            queries = attn.rope(queries, offset=cache.offset)
+            keys = attn.rope(keys, offset=cache.offset)
+            keys, values = cache.update_and_fetch(keys, values)
+        else:
+            queries = attn.rope(queries)
+            keys = attn.rope(keys)
+
+        n_kv_heads = keys.shape[1]
+        n_repeats = attn.num_attention_heads // n_kv_heads
+        S = keys.shape[2]
+
+        if n_repeats > 1:
+            q4 = queries.reshape(B, n_kv_heads, n_repeats, L, -1)
+            k4 = mx.expand_dims(keys, 2)
+            v4 = mx.expand_dims(values, 2)
+            scores = (q4 * attn.scale) @ k4.swapaxes(-1, -2)
+        else:
+            scores = (queries * attn.scale) @ keys.swapaxes(-1, -2)
+
+        if L > 1:
+            # Causal mask derived from shapes alone -- correct for both the
+            # prefill step (L == prompt length) and any future multi-token
+            # step, regardless of whatever mask object the caller passed in
+            # (we ignore it deliberately; see module docstring).
+            offset = S - L
+            rinds = mx.arange(S)
+            linds = mx.arange(offset, offset + L)[:, None]
+            causal = linds >= rinds[None]
+            neg_inf = mx.array(-1e9, dtype=scores.dtype)
+            scores = mx.where(causal, scores, neg_inf)
+
+        probs = mx.softmax(scores.astype(mx.float32), axis=-1).astype(scores.dtype)
+
+        if n_repeats > 1:
+            output = (probs @ v4).reshape(B, attn.num_attention_heads, L, -1)
+            probs_full = probs.reshape(B, attn.num_attention_heads, L, S)
+        else:
+            output = probs @ values
+            probs_full = probs
+
+        on_probs(probs_full)
+
+        output = output.transpose(0, 2, 1, 3).reshape(B, L, -1)
+        return attn.o_proj(output * mx.sigmoid(gate))
+
+    attn.__call__ = patched_call
+    return original_call
+
+
+def load_dragin_model(model_path: str) -> Tuple[Any, Any]:
+    """Load a model + tokenizer for direct (non-REST) generation with mlx-lm."""
+    from mlx_lm import load
+
+    return load(model_path)
+
+
+def generate_with_probe(
+    model: Any,
+    tokenizer: Any,
+    prompt: str,
+    max_tokens: int,
+    temperature: float = 0.0,
+) -> Iterator[ProbedToken]:
+    """Synchronous, one-step-at-a-time generation yielding entropy + attention
+    for every token. Restores the original attention layer on exit (including
+    early ``.close()``/break) via try/finally.
+    """
+    import mlx.core as mx
+    import numpy as np
+    from mlx_lm.models.cache import make_prompt_cache
+    from mlx_lm.sample_utils import make_sampler
+
+    probe_layer = _find_last_attention_layer(model)
+    captured: List[Any] = [None]
+
+    def _on_probs(probs_full: Any) -> None:
+        captured[0] = probs_full
+
+    original_call = _patch_attention_layer(probe_layer, _on_probs)
+    sampler = make_sampler(temp=temperature)
+    try:
+        prompt_tokens = mx.array(tokenizer.encode(prompt))
+        prompt_cache = make_prompt_cache(model)
+
+        def step(input_tokens: Any) -> Tuple[Any, Any]:
+            logits = model(input_tokens[None], cache=prompt_cache)
+            logits = logits[:, -1, :]
+            logprobs = logits - mx.logsumexp(logits, axis=-1, keepdims=True)
+            token = sampler(logprobs)
+            mx.eval(token, logprobs)
+            return token, logprobs
+
+        token, logprobs = step(prompt_tokens)
+        n = 0
+        while n < max_tokens:
+            probs = captured[0]
+            if probs is None:
+                raise RuntimeError(
+                    "attention probe captured nothing -- the patched layer's "
+                    "__call__ never ran; check _find_last_attention_layer picked "
+                    "a layer actually on the forward path."
+                )
+            s_total = probs.shape[-1]
+            row = np.asarray(probs[0, :, -1, : s_total - 1].mean(axis=0)).tolist()
+            lp = np.asarray(logprobs[0])
+            entropy = float(-(np.exp(lp) * lp).sum())
+            tok_id = int(token.item())
+            text = tokenizer.decode([tok_id])
+            yield ProbedToken(text=text, token_id=tok_id, entropy=entropy, attn_row=row)
+            if tok_id in tokenizer.eos_token_ids:
+                return
+            n += 1
+            if n >= max_tokens:
+                return
+            token, logprobs = step(token.reshape(1))
+    finally:
+        probe_layer.self_attn.__call__ = original_call
+
+
+def verify_against_fused(
+    model_path: str,
+    prompt: str = "The quick brown fox jumps over the lazy dog. It then",
+    atol: float = 1e-3,
+) -> bool:
+    """One-time sanity check: does the patched (unfused) attention layer produce
+    the SAME end-to-end logits as the original fused kernel, given the same
+    input? Run this once on real hardware -- and make it pass -- before trusting
+    any RIND score from generate_with_probe. Not run automatically; call it from
+    a script or REPL on the machine that actually has mlx + the model weights.
+    """
+    import mlx.core as mx
+
+    model, tokenizer = load_dragin_model(model_path)
+    tokens = mx.array(tokenizer.encode(prompt))[None]
+
+    from mlx_lm.models.cache import make_prompt_cache
+
+    baseline_logits = model(tokens, cache=make_prompt_cache(model))
+    mx.eval(baseline_logits)
+
+    layer = _find_last_attention_layer(model)
+    original_call = _patch_attention_layer(layer, lambda _probs: None)
+    try:
+        patched_logits = model(tokens, cache=make_prompt_cache(model))
+        mx.eval(patched_logits)
+    finally:
+        layer.self_attn.__call__ = original_call
+
+    diff = float(mx.abs(baseline_logits - patched_logits).max())
+    ok = diff < atol
+    status = "PASS" if ok else "FAIL"
+    print(
+        f"[dragin_rlm] unfused-attention patch check: max|delta logits| = "
+        f"{diff:.6g} ({status}, atol={atol})"
+    )
+    return ok

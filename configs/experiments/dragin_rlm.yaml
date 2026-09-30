@@ -1,0 +1,20 @@
+# DRAGIN-RLM: RIND-gated generation with QFS-sliced worker sub-calls (see
+# src/dragin_rlm/harness.py). Different shape from the other conditions' configs:
+# the root model here is loaded directly via mlx-lm (attention_probe.py), not
+# addressed through the litellm proxy, because RIND needs per-token attention
+# that the REST bridge can't expose. Run with experiments/run_dragin.py, not
+# experiments/run.py -- see that script's docstring for why (this needs one
+# long-lived process holding the model, not --workers fan-out).
+name: dragin_rlm
+mode: dragin
+models:
+  worker: openai/qwen35-worker   # sub-call answering over a QFS-selected slice; regular litellm/REST
+dragin:
+  model_path: "mlx-community/Qwen3.5-35B-A3B-4bit"  # root; loaded directly, no litellm alias
+  theta: 1.0            # [SWEEP] RIND trigger threshold (paper Table 9: 0.6-1.5 depending on dataset/model)
+  top_n: 25              # QFS query length in tokens (paper Table 9: 25-35)
+  generate_length: 256   # total root-token budget across all segments
+  max_triggers: 8        # safety cap on retrieval count; the paper leaves this unbounded
+  retrieval_top_k: 3     # passages handed to the worker per trigger
+  passage_chars: 1000
+  temperature: 0.0

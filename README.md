@@ -1,152 +1,220 @@
-# GATE-RLM: Gated Adaptive Termination for Recursive Language Models
+# P(IK)-RLM: Confidence-Gated Routing for Recursive Language Models
 
-Target venue: Knowledge and Natural Language Processing (KNLP) track, ACM SAC 2027 (submission due **October 2, 2026**).
-
-**Title options**
-1. *Token Confidence and Evidence Sufficiency in Recursive Language Models*
-2. *Adaptive Termination for Cost-Efficient Knowledge Retrieval with Recursive Language Models*
+Current focus of this repository: constructing and evaluating **P(IK)-RLM**, one condition
+of a broader GATE-RLM study (see `docs/PLAN.md` for the full context), against
+**BrowseComp-Plus**. Everything else in the original GATE-RLM design (relevance gate,
+stopping rule, BABILong) still exists in the codebase but is out of scope for the current
+work; this document describes only what's active.
 
 ## Motivation
 
 Recursive Language Models (RLMs; Zhang, Kraska and Khattab, 2025) store a long prompt as a
 variable in a Python REPL. The model writes code that splits it up and calls itself
-recursively on the pieces. That removes the context-length ceiling, but the framework never
-answers one question: **when has the model read enough?**
+recursively on the pieces, removing the context-length ceiling of a normal LLM call. But
+the framework never answers one question: **does this query even need recursion?**
 
-In the RLM loop, the only stopping rule is the root model deciding to emit its final answer.
-Nothing checks whether a retrieved chunk is relevant to the task, or whether the evidence
-gathered so far is sufficient. The original authors list exploding sub-call costs as an
-open problem. Our pilot runs showed:
+In the RLM loop, every query goes through the full recursive REPL process, even ones a
+single direct read could answer more cheaply and just as accurately. P(IK)-RLM adds a
+gate in front of that loop: a cheap, up-front confidence check that decides whether to
+answer directly or hand off to the full recursive process.
 
-- **(a)** RLMs beat a conventional LLM on long, complex queries but lose on short, simple
-  ones, where direct completion is more accurate and cheaper;
-- **(b)** RLMs retrieve a wide range of information, much of it not relevant to the task;
-- **(c)** inference cost and latency are noticeably higher.
+## What P(IK)-RLM is
 
-An LLM's native confidence is a next-token probability: how sure it is of the next word.
-It says nothing about whether a chunk is relevant or whether the evidence is sufficient.
-GATE-RLM bridges those quantities.
+A single gating stage — the **router** — placed in front of an otherwise unmodified RLM
+loop. No relevance filtering, no adaptive stopping inside the recursion: those are
+separate conditions in the broader GATE-RLM study, disabled here so the router's own
+effect is isolated.
 
-## Research question
+**The construction, step by step** (`src/gate_rlm/router.py`, function `_logprob_pik`):
 
-**Which runtime signal best predicts that enough evidence has been gathered: embedding
-similarity, reranker score, or model confidence?**
+1. Take a short **preview** of the context (first ~4000 characters, not the full
+   document) — the point of the router is to be cheap, so it never sees the whole thing.
+2. Generate a candidate answer on that preview, with `logprobs=True`.
+3. Compute **P(IK) = exp(mean(log P(token)))** over the generated tokens (Kadavath et al.,
+   2022) — the model's own calibrated confidence, derived from its actual token
+   probabilities rather than a verbalized self-rating.
+4. If `P(IK) >= tau_route` (0.75) **and** the query doesn't match a "complex query" regex
+   (aggregation, counting, comparison, etc.) **and** the model actually produced an
+   answer → route **direct**, and reuse that same candidate answer as the final output.
+   A confident example costs exactly one call.
+5. Otherwise → route **rlm**: the full recursive REPL loop runs (root writes Python,
+   delegates to worker sub-calls) until the model emits `FINAL()` on its own or hits
+   `max_iterations` / the elapsed-time cap.
 
-The pipeline also answers two supporting questions: does gating cut cost without cutting
-accuracy (vs. vanilla RLM), and how does the benefit change with query length and complexity?
+One implementation detail worth knowing: the confidence probe bypasses `litellm` and talks
+to the local model server directly over HTTP (`_raw_logprob_probe`), because the MLX
+backend's logprobs response omits the `token` field, which crashes `litellm`'s strict
+response validation even though generation itself succeeds.
 
-## Method
+**Models:** Qwen 3.5, 2B (worker, bf16) + 35B-A3B (root/"thinker", 4-bit; MoE with ~3B
+active parameters per token), served locally via `mlx_lm.server` + a `litellm` proxy
+bridge (`configs/litellm_proxy.yaml`, `scripts/start_mlx_local.sh`). Thinking mode
+disabled (`enable_thinking: false`) to match the team's agreed setting.
 
-| Stage | What it decides | How |
-|---|---|---|
-| 0 Router | answer directly or recurse? | P(IK)-inspired self-assessment: context fits the window + simple query (optional LLM self-rating on a preview) |
-| 1 Relevance gate | is this chunk worth passing to the root? | cosine prefilter (bge-small) → cross-encoder reranker (bge-reranker); irrelevant sub-call outputs are hidden from the root |
-| 2 Stopping rule | has enough been read? | stop on **sufficiency** (confident, relevant, agreeing worker answers; FLARE / DeepConf style) **or** the **knee** of the relevant-evidence gain curve (Cormack & Grossman) |
+**Config:** `configs/experiments/pik_rlm.yaml` — `router: {enabled: true, method:
+logprob, tau_route: 0.75}`, `relevance: {enabled: false}`, `stopping: {enabled: false}`.
 
-After a stop, later sub-calls return immediately at zero cost. If the root keeps going past
-a grace turn, `FINAL(best_answer)` is injected.
+## Evaluation: BrowseComp-Plus
 
-**Models:** GPT-5 (root) + GPT-5-mini (sub-calls), the original paper's configuration.
-GPT-5 models generally don't return token log-probs, so worker confidence is *verbalized*
-by default (structured JSON reply). A log-prob signal is available through a separate
-non-reasoning scorer model (`confidence.source: logprob`).
+[BrowseComp-Plus](https://github.com/texttron/BrowseComp-Plus) (Chen et al., 2025) is a
+retrieval benchmark whose questions carry human-verified **gold** (sufficient) and
+**evidence** (relevant) document labels. `scripts/prepare_browsecomp.py` builds each
+example's context from gold + evidence + sampled hard-negative documents, shuffled so
+neither position nor length gives away which documents matter.
 
-Built on [grishahq/recursive-llm](https://github.com/grishahq/recursive-llm), pinned to a
-fixed commit in `pyproject.toml`. `GateRLM` subclasses its `RLM` and hooks the worker call,
-the root turn, and the REPL event stream (`src/gate_rlm/gate.py`).
+Gold/evidence labels are **logging only** — they let us detect whether the pipeline
+actually read the needle, but nothing in `src/gate_rlm` uses them to make a live decision.
 
-## Data
-
-| Set | Role | Ground truth used |
-|---|---|---|
-| [BABILong](https://huggingface.co/datasets/RMT-team/babilong) qa1, qa2 at 4k-512k | main, controllable (RQ1-3) | answer + supporting facts, recovered by aligning each sample with its `0k` version (`scripts/prepare_babilong.py`) |
-| [BrowseComp-Plus](https://github.com/texttron/BrowseComp-Plus) subset | realistic confirmation | answer + human-verified *gold* (sufficient) and *evidence* (relevant) documents |
-
-Validation/test splits are fixed by a hash of the question id. Thresholds are chosen on
-validation only, then frozen.
-
-## Metrics
-
-| Group | Metrics |
-|---|---|
-| Effectiveness | accuracy (BABILong contains-match; EM/F1), evidence precision / recall of what the gate passed |
-| Efficiency | total tokens, sub-calls, cost (USD), latency p50 / p95 |
-| Trade-off | cost per correct answer, sub-call productivity, accuracy-cost Pareto curve, oracle-stop gap |
-| Signal quality (RQ) | AUROC / AUPRC per signal for relevance and for sufficiency, premature-stop rate |
-| Headline | **over-read ratio**: share of tokens spent after the evidence had already been read |
-| Significance | McNemar (accuracy), paired bootstrap + Wilcoxon (cost), 3 seeds |
-
-Baselines: direct LLM, vanilla RLM, RLM with hard budget caps, oracle stop (computed from
-logs), plus ablations removing the router, the relevance filter, or the stopping rule.
+**Indicators:** accuracy and inference time, computed per condition by
+`eval/aggregate.py`'s `summarize()` (`acc_mean`/`acc_std`, `latency_p50`/`latency_p95`),
+plus `direct_route_share` — the fraction of questions the router judged confident enough
+to skip recursion, which is the headline number specific to this condition.
 
 ## Quick start
 
 ```bash
-git clone <this repo> && cd gate-rlm
+git clone <this repo> && cd humble-rlm
 python -m venv .venv && source .venv/bin/activate
-make setup                     # pip install -e ".[dev,tokens]"
-cp .env.example .env           # add OPENAI_API_KEY
-make test                      # no API calls; includes a fake-model end-to-end run
-make data                      # BABILong subset -> data/processed/babilong.jsonl
-make smoke                     # 3 real examples on the cheap dev pair
+pip install -e ".[dev,tokens]" && pip install mlx-lm "litellm[proxy]" "fastapi==0.115.6"
+make test                      # no API calls; sanity check before anything else
 ```
 
-Full pipeline (each step writes what the next one reads):
+Getting BrowseComp-Plus data (one-time, manual — see `scripts/prepare_browsecomp.py`):
 
 ```bash
-make observe-val   # log every signal on validation (no gating)
-make sweep         # replay logs offline under a threshold grid -> results/thresholds.json
-make signals       # RQ table: AUROC / AUPRC per signal
-make test-runs     # baselines + GATE-RLM on test, thresholds frozen
-make ablations
-make eval          # results/table_main.csv, table_rq3.csv, paired_tests.json, figures
+git clone https://github.com/texttron/BrowseComp-Plus.git && cd BrowseComp-Plus
+python scripts_build_index/decrypt_dataset.py --output data/browsecomp_plus_decrypted.jsonl \
+    --generate-tsv topics-qrels/queries.tsv
+cp data/browsecomp_plus_decrypted.jsonl topics-qrels/qrel_golds.txt topics-qrels/qrel_evidence.txt \
+    <this-repo>/data/raw/
 ```
 
-`make sweep` replays the observe-mode logs under every threshold setting instead of paying
-for a live run per setting. The live test runs are the numbers we report.
+The current workflow — a 50-question random sample, for fast validation before committing
+to the full set:
+
+```bash
+make browsecomp-data         # full 800-question set -> data/processed/browsecomp.jsonl
+make browsecomp-sample50     # deterministic 50-question sample (seed=42, test split)
+
+# start the MLX bridge yourself -- model downloads need manual confirmation
+./scripts/start_mlx_local.sh
+export OPENAI_API_BASE=http://localhost:4000/v1
+export OPENAI_API_KEY=not-needed
+
+make pik-sample50            # run P(IK)-RLM against the sample
+make pik-sample50-eval       # accuracy + inference-time table
+```
 
 ## Repository layout
 
 ```
-configs/default.yaml        all knobs; [SWEEP] marks thresholds chosen on validation
-configs/experiments/        one file per condition (baselines, gate, ablations, dev)
+configs/experiments/pik_rlm.yaml   the condition this repo currently focuses on
+configs/litellm_proxy.yaml         routes root/worker aliases to two mlx_lm.server ports
+scripts/start_mlx_local.sh         starts both MLX backends + the litellm proxy
+scripts/prepare_browsecomp.py      BrowseComp-Plus: decrypted rows -> processed JSONL
+scripts/sample_dataset.py          deterministic N-question random sample
+scripts/shard_dataset.py           deterministic hash-based N-way split (multi-machine runs)
 src/gate_rlm/
-  gate.py                   GateRLM: hooks into recursive-llm (worker, root, events)
-  router.py                 Stage 0
-  relevance.py              Stage 1 (cosine prefilter + cross-encoder)
-  stopping.py               Stage 2 (sufficiency + knee), shared by live runs and replay
-  confidence.py             structured worker reply, optional log-prob scorer
-  pipeline.py               one example -> one result record
-  data.py                   JSONL, splits, gold-evidence fingerprints, BABILong rules
-scripts/                    dataset preparation
-experiments/run.py          run a config over a split (resumable, parallel)
-experiments/sweep.py        threshold selection on validation
-eval/                       metrics, aggregation, RQ signal analysis, stats, figures
-docs/PLAN.md                roles, timeline, sync points, cut order
-docs/RESULT_SCHEMA.md       every field in a result record
-paper/                      ACM template notes, final figures and tables
+  router.py                        Stage 0: the P(IK) router itself (_logprob_pik)
+  gate.py                          GateRLM: hooks into recursive-llm for the "rlm" branch
+  pipeline.py                      one example -> one result record (route -> direct/rlm)
+  data.py                          JSONL I/O, splits, gold-evidence fingerprints
+experiments/run.py                 run a config over a data file (resumable, parallel)
+eval/aggregate.py                  accuracy + latency table, paired significance tests
+docs/PLAN.md                       full GATE-RLM study context and team roles
 ```
+
+Everything else referenced by `docs/PLAN.md` and the wider GATE-RLM design (relevance
+gate, stopping rule, BABILong, the other four conditions) still exists in the codebase —
+`src/gate_rlm/relevance.py`, `src/gate_rlm/stopping.py`, `scripts/prepare_babilong.py`,
+`configs/experiments/{conventional,reranker,flare,confident}_rlm.yaml` — just not the
+current focus of this document.
+
+## DRAGIN-RLM (separate construction, in progress)
+
+`src/dragin_rlm/` is a second gating mechanism, adapted from DRAGIN (Su et al. 2024,
+arXiv:2403.10081), built alongside P(IK)-RLM rather than as a GateRLM subclass — RIND
+needs control *inside* a single generation call (token by token), which GateRLM's
+`_call_llm`/`_call_leaf` hooks don't reach.
+
+**The idea:** while the root model generates, score every token with
+`S_RIND(t_i) = H_i · a_max(i) · s_i` — entropy × max self-attention any later token pays
+back to it × a stopword mask (paper Eq. 5). Once a token's score crosses `theta`,
+truncate the generation there, build a query from the top-n tokens the triggering token
+itself attended to most (QFS, paper §3.2), and hand that query to a worker sub-call over
+a slice of the document — then resume generation informed by what came back.
+
+**Two adaptations, both load-bearing for this project's Qwen3.5-35B-A3B root model**
+(see `src/dragin_rlm/attention_probe.py` for the full reasoning):
+
+1. **No REST access to attention.** RIND needs raw attention weights; `mlx_lm.server`'s
+   OpenAI-compatible API only ever returns the chosen token's logprob (the paper's own
+   Limitations, §7, says exactly this: it doesn't work through APIs that hide attention
+   scores). So DRAGIN-RLM's root model bypasses litellm entirely and talks to mlx-lm
+   in-process (`attention_probe.load_dragin_model` / `generate_with_probe`) — this is why
+   it has its own runner, `experiments/run_dragin.py`, instead of reusing
+   `experiments/run.py`.
+2. **Qwen3.5 is a hybrid linear-attention model**, not a plain Transformer: most decoder
+   layers run a recurrent GatedDeltaNet mechanism with no pairwise attention matrix at
+   all, and only every 4th layer (`full_attention_interval`) runs real softmax
+   self-attention. "The last Transformer layer" (the paper's own choice, footnote 2)
+   is reinterpreted as the last layer that actually has one. That layer's fused attention
+   kernel is also monkey-patched (instance-level, one layer only) with an unfused
+   reimplementation, since the fused kernel never materializes the softmax matrix a
+   probe could read.
+
+**Retrieval substitution:** the paper's "retrieval module" is BM25 over Wikipedia.
+BrowseComp-Plus already hands each question a single assembled document (gold + evidence
++ hard negatives), so DRAGIN-RLM's "retrieval" (`src/dragin_rlm/retrieval.py`) is BM25
+over *that* document's passages, feeding a worker LLM sub-call — the same "read a slice
+of the stored context" RLM already does, just triggered by RIND/QFS instead of the
+root's own code.
+
+**Status:** the math (RIND, QFS, BM25 slicing) is implemented and unit-tested
+(`tests/test_dragin_*.py`, no mlx required). The mlx-lm integration
+(`attention_probe.py`, the unfused-attention patch) is written and reviewed against
+mlx-lm's source but has never been executed — this development environment has no Apple
+GPU access. **Before trusting any RIND score from a real run, call
+`dragin_rlm.attention_probe.verify_against_fused(model_path)` on the machine that
+actually has the model weights and confirm it prints PASS** — `experiments/run_dragin.py`
+does this automatically and refuses to run if it fails (`--skip-verify` to override).
+
+```bash
+python experiments/run_dragin.py --config configs/experiments/dragin_rlm.yaml \
+  --data data/processed/browsecomp_sample50.jsonl --split all \
+  --out results/runs/dragin_rlm__browsecomp_sample50.jsonl
+make dragin-sample50-eval
+```
+
+Sequential, not `--workers`-parallel like the other conditions: the root model is loaded
+once, resident in this one process, for the same reason the litellm-based conditions
+fan out and this one can't (see `experiments/run_dragin.py`'s docstring).
+
+## Known gotchas (learned the hard way)
+
+- **litellm deployment cooldowns**: with exactly one deployment per model (one
+  `mlx_lm.server` instance each), litellm's default cooldown-after-failure behavior
+  blacklists the sole deployment after a single transient timeout, cascading into
+  `RateLimitError`/`NotFoundError` on every subsequent call. Fixed via
+  `router_settings: {disable_cooldowns: true}` in `configs/litellm_proxy.yaml`.
+- **`MaxIterationsError`**: un-gated recursion (the `"rlm"` branch here, since relevance
+  and stopping are both off) frequently doesn't converge within `max_iterations: 20`.
+  This shows up even on isolated hardware with no resource contention — it's a real
+  behavior of un-gated recursion, not an infra artifact.
+- **Shared hardware**: if running on a machine that also hosts other `mlx_lm.server`
+  processes (yours or other users'), expect slower per-call latency and occasional
+  timeouts under contention, on top of the `MaxIterationsError` baseline.
+- **`nohup` in some pty-backed terminals** fails with "can't detach from console" — use
+  a subshell instead: `(cmd &)`.
 
 ## Rules for the team
 
 - Gold annotations are **logging only**. Nothing in `src/gate_rlm` may decide using them.
-- Never tune on test. Thresholds come from `results/thresholds.json`, written once.
-- Debug with `dev_cheap`; never report its numbers.
-- Keep this repository private until review ends (double-blind), or share an anonymized mirror.
-
-## Known limitations
-
-- `GateRLM` supports `max_depth=1`, the paper's default (sub-calls are plain LM calls).
-- The root can also read the document with REPL prints and regex; those reads count toward
-  cost and gold detection but not toward the gate's checkpoints.
-- If BABILong's `0k` and long configs don't align for a task, `prepare_babilong.py` skips
-  those samples and reports how many. Check the counts before running.
-- Replay-based threshold selection assumes the root would issue the same sub-calls; live
-  gating changes what the root sees, so only live test runs are reported.
+- Never tune `tau_route` on the test split.
+- Keep this repository private until review ends (double-blind), or share an anonymized
+  mirror.
 
 ## Built on
 
-Zhang, Kraska & Khattab, *Recursive Language Models* (arXiv:2512.24601) · FLARE (Jiang et al., 2023) ·
-P(IK) / P(True) (Kadavath et al., 2022) · DeepConf (Fu et al., 2025) · CRAG (Yan et al., 2024) ·
-Sufficient Context (Joren et al., 2025) · CALM (Schuster et al., 2022) · knee stopping method
-(Cormack & Grossman, 2016) · BABILong (Kuratov et al., 2024) · BrowseComp-Plus (Chen et al., 2025).
+Zhang, Kraska & Khattab, *Recursive Language Models* (arXiv:2512.24601) ·
+P(IK) / P(True) (Kadavath et al., 2022) · BrowseComp-Plus (Chen et al., 2025)

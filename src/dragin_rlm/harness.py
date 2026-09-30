@@ -1,0 +1,203 @@
+"""DRAGIN-RLM's generation loop: early-stop-if-confident, trigger-sub-call-if-
+uncertain (DRAGIN, Su et al. 2024, adapted to this project's RLM setting).
+
+Not a GateRLM subclass. GateRLM's hooks (_call_llm / _call_leaf, gate_rlm/gate.py)
+sit at the boundary of whole LLM calls made through recursive-llm's litellm
+plumbing -- RIND needs control INSIDE a single generation call, at the token
+level, which that boundary doesn't expose. So this is its own loop, built
+directly on attention_probe's synchronous mlx-lm wrapper.
+
+Mapping the paper's algorithm onto this project's setting:
+  - "Generate" = attention_probe.generate_with_probe on the root model, direct
+    (non-REST) mlx-lm access, root turns.
+  - "When to retrieve" = RIND (rind.RindState), checked online as each token is
+    produced.
+  - "What to retrieve" = QFS (qfs.format_query) over the triggering token's own
+    attention row.
+  - "Retrieval module" = retrieval.slice_context, BM25-lite over the document
+    BrowseComp-Plus already assembled as this question's context (not an
+    external index -- see retrieval.py) feeding a worker LLM sub-call (regular
+    litellm/REST, like GateRLM's leaf calls -- the worker doesn't need attention
+    introspection, it's just answering over an already-selected passage).
+  - "Continue generation after retrieval" (Eq. 6: truncate T at t_i, inject
+    retrieved passages, resume) = truncate generated_text and RindState at the
+    trigger index, build a new prompt with the passages inserted, start a new
+    generate_with_probe segment that continues from the truncated text.
+"""
+
+from __future__ import annotations
+
+import time
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Tuple
+
+from . import qfs, retrieval
+from .attention_probe import generate_with_probe, load_dragin_model
+from .rind import RindState
+
+ANSWER_CUE = "So the answer is"
+
+DIRECT_PROMPT = (
+    "Answer the question using the document. Reason step by step, then end your "
+    "answer with '{cue}: <short answer>'.\n\nDocument:\n{{context}}\n\n"
+    "Question: {{query}}\nAnswer:"
+).format(cue=ANSWER_CUE)
+
+RETRIEVAL_TEMPLATE = (
+    "Answer the question using the document. Reason step by step, then end your "
+    "answer with '{cue}: <short answer>'.\n\nDocument:\n{{context}}\n\n"
+    "Below are passages relevant to what you were about to say next -- use them "
+    "if they help, and stay consistent with what you already wrote:\n{{passages}}\n\n"
+    "Question: {{query}}\nAnswer:{{prefix}}"
+).format(cue=ANSWER_CUE)
+
+WORKER_PROMPT = (
+    "Answer the question using only the passages below. Reply with the short "
+    "answer only, or 'NOT FOUND' if the passages don't contain it.\n\n"
+    "Passages:\n{passages}\n\nQuestion: {query}\nAnswer:"
+)
+
+
+@dataclass
+class DraginConfig:
+    model_path: str              # local mlx-community model id/path for the root
+    worker_model: str            # litellm alias for the sub-call, e.g. openai/qwen35-worker
+    theta: float = 1.0           # [SWEEP] RIND trigger threshold
+    top_n: int = 25              # QFS query length (paper Table 9 range: 25-35)
+    generate_length: int = 256   # total root tokens budget across all segments
+    max_triggers: int = 8        # safety cap; the paper has no bound on retrieval count
+    retrieval_top_k: int = 3     # passages handed to the worker per trigger
+    passage_chars: int = 1000
+    temperature: float = 0.0
+
+
+def _call_worker(worker_model: str, query: str, passages: str) -> str:
+    import litellm
+
+    resp = litellm.completion(
+        model=worker_model,
+        messages=[
+            {
+                "role": "user",
+                "content": WORKER_PROMPT.format(
+                    passages=passages or "(nothing found)", query=query
+                ),
+            }
+        ],
+        max_tokens=128,
+        temperature=0,
+    )
+    return (resp.choices[0].message.content or "").strip()
+
+
+def _extract_answer(text: str) -> str:
+    """Same "So the answer is" extraction convention the paper's own evaluation
+    uses (Appendix B), reused here for BrowseComp-Plus's short-answer format."""
+    if ANSWER_CUE in text:
+        tail = text.split(ANSWER_CUE, 1)[1]
+        return tail.strip(" :\n").split("\n")[0].strip()
+    return text.strip()
+
+
+def run_dragin(
+    query: str,
+    context: str,
+    cfg: DraginConfig,
+    model: Any = None,
+    tokenizer: Any = None,
+) -> Dict[str, Any]:
+    """Generate an answer to ``query`` over ``context`` with RIND-gated,
+    QFS-sliced sub-calls. Returns a result dict compatible with gate_rlm's
+    record schema (answer, latency_s, completion_tokens, llm_calls, leaf_calls,
+    root_iterations) plus DRAGIN-specific fields (n_retrievals, rind_triggers).
+
+    ``model``/``tokenizer`` can be passed in to reuse an already-loaded model
+    across many examples (experiments/run_dragin.py does this -- loading a 35B
+    model per example would be absurd); if omitted they're loaded fresh here.
+    """
+    if model is None or tokenizer is None:
+        model, tokenizer = load_dragin_model(cfg.model_path)
+
+    t0 = time.perf_counter()
+    prompt = DIRECT_PROMPT.format(context=context, query=query)
+    state = RindState()
+    generated_text = ""
+    triggers: List[Dict[str, Any]] = []
+    total_new_tokens = 0
+    segments_run = 0
+    budget = cfg.generate_length
+
+    while budget > 0 and len(triggers) <= cfg.max_triggers:
+        segments_run += 1
+        stream = generate_with_probe(
+            model, tokenizer, prompt, max_tokens=budget, temperature=cfg.temperature
+        )
+        triggered_at: Optional[int] = None
+        try:
+            for probed in stream:
+                idx = state.update(probed.text, probed.entropy, probed.attn_row)
+                generated_text += probed.text
+                total_new_tokens += 1
+                budget -= 1
+                if idx is not None and state.score_at(idx) > cfg.theta:
+                    triggered_at = idx
+                    break
+                if ANSWER_CUE in generated_text or budget <= 0:
+                    break
+        finally:
+            stream.close()
+
+        if triggered_at is None:
+            break  # finished naturally: EOS, answer cue seen, or budget exhausted
+
+        if len(triggers) >= cfg.max_triggers:
+            break
+
+        keep_chars = sum(len(t) for t in state.tokens[:triggered_at])
+        generated_text = generated_text[:keep_chars]
+        prior_tokens = state.tokens[:triggered_at]
+        row = state.qfs_row(triggered_at)
+        score = state.score_at(triggered_at)
+        query_str = qfs.format_query(prior_tokens, row, cfg.top_n)
+        state.reset_from(triggered_at)
+
+        passages = retrieval.slice_context(
+            context,
+            query_str or query,
+            top_k=cfg.retrieval_top_k,
+            passage_chars=cfg.passage_chars,
+        )
+        worker_answer = _call_worker(cfg.worker_model, query_str or query, passages)
+        triggers.append(
+            {
+                "index": triggered_at,
+                "query": query_str,
+                "score": score,
+                "worker_answer": worker_answer,
+            }
+        )
+
+        prompt = RETRIEVAL_TEMPLATE.format(
+            context=context,
+            passages=f"[1] {passages}\n(worker's read: {worker_answer})"
+            if passages
+            else f"(nothing found; worker's read: {worker_answer})",
+            query=query,
+            prefix=generated_text,
+        )
+
+    answer = _extract_answer(generated_text)
+    latency = time.perf_counter() - t0
+    return {
+        "answer": answer,
+        "raw_generation": generated_text,
+        "latency_s": latency,
+        "completion_tokens": total_new_tokens,
+        "llm_calls": segments_run + len(triggers),
+        "leaf_calls": len(triggers),
+        "root_iterations": segments_run,
+        "n_retrievals": len(triggers),
+        "rind_triggers": triggers,
+        "theta": cfg.theta,
+        "top_n": cfg.top_n,
+    }
