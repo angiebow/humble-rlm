@@ -38,16 +38,23 @@ pik-sample50-per-question: ## per-question accuracy + latency (not aggregated) f
 
 # --- DRAGIN-RLM (src/dragin_rlm/): separate construction, needs direct mlx-lm
 # access on the machine with the model weights (see experiments/run_dragin.py).
-# Not part of the litellm/MLX-bridge path above -- run it there directly:
+# Not part of the litellm/MLX-bridge path above -- run it there directly.
+# theta gets swept (see DRAGIN_RLM_TEST_RESULTS.md), so every run/eval output
+# below is theta-tagged, read live from the config each time, rather than a
+# static name that silently goes stale the next time theta changes.
+DRAGIN_THETA := $(shell grep -oE 'theta: [0-9.]+' configs/experiments/dragin_rlm.yaml | grep -oE '[0-9.]+')
+
 dragin-sample50: ## run DRAGIN-RLM against the 50-question sample (loads the model directly; slow, sequential)
 	$(PY) experiments/run_dragin.py --config configs/experiments/dragin_rlm.yaml --data $(BC_SAMPLE) \
-	  --split all --out $(RUNS)/dragin_rlm__browsecomp_sample50.jsonl
+	  --split all --out $(RUNS)/dragin_rlm__browsecomp_sample50_theta$(DRAGIN_THETA).jsonl
 
 dragin-sample50-eval: ## accuracy + inference-time table for a dragin_rlm sample50 run
-	$(PY) eval/aggregate.py --runs $(RUNS)/dragin_rlm__browsecomp_sample50.jsonl --out results/table_dragin_sample50.csv
+	$(PY) eval/aggregate.py --runs $(RUNS)/dragin_rlm__browsecomp_sample50_theta$(DRAGIN_THETA).jsonl \
+	  --out results/table_dragin_sample50_theta$(DRAGIN_THETA).csv
 
 dragin-sample50-per-question: ## per-question accuracy + latency (not aggregated) for the dragin sample50 run
-	$(PY) eval/per_question.py --runs $(RUNS)/dragin_rlm__browsecomp_sample50.jsonl --out results/table_dragin_per_question.csv --semantic
+	$(PY) eval/per_question.py --runs $(RUNS)/dragin_rlm__browsecomp_sample50_theta$(DRAGIN_THETA).jsonl \
+	  --out results/table_dragin_sample50_theta$(DRAGIN_THETA)_per_question.csv --semantic
 
 setup: ## install the package and dependencies
 	$(PY) -m pip install -e ".[dev,tokens]"
