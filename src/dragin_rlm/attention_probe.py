@@ -202,10 +202,24 @@ def generate_with_probe(
     prompt: str,
     max_tokens: int,
     temperature: float = 0.0,
+    prefill_step_size: int = 2048,
 ) -> Iterator[ProbedToken]:
     """Synchronous, one-step-at-a-time generation yielding entropy + attention
     for every token. Restores the original attention layer on exit (including
     early ``.close()``/break) via try/finally.
+
+    Prefill is chunked at ``prefill_step_size`` tokens, mirroring
+    mlx_lm.generate_step's own behavior -- BrowseComp-Plus documents can run
+    to 80k+ tokens (observed: 81305 for one real example), and a single
+    monolithic forward pass over the whole prompt is what actually crashed
+    the first live run here (silently, no Python traceback -- a native
+    Metal-level fault, not something the attention patch's own memory fix
+    caught). verify_against_fused's ~12-token test prompt never exercises
+    this path, which is why it always passes regardless. Only the FINAL
+    chunk's forward pass matters for sampling/probing -- every earlier
+    chunk's only job is to populate the KV cache; its own logits and
+    attention row are interior-prompt noise, not the signal RIND cares about
+    (always the token about to be generated), so they're discarded.
     """
     import mlx.core as mx
     import numpy as np
@@ -232,7 +246,15 @@ def generate_with_probe(
             mx.eval(token, logprobs)
             return token, logprobs
 
-        token, logprobs = step(prompt_tokens)
+        remaining = prompt_tokens
+        while len(remaining) > 1:
+            n_chunk = min(prefill_step_size, len(remaining) - 1)
+            out = model(remaining[:n_chunk][None], cache=prompt_cache)
+            mx.eval(out)
+            remaining = remaining[n_chunk:]
+            mx.clear_cache()
+
+        token, logprobs = step(remaining)
         n = 0
         while n < max_tokens:
             probs = captured[0]
