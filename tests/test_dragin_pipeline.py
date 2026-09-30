@@ -38,7 +38,7 @@ def test_dragin_config_from_cfg_reads_the_dragin_block():
 
 
 def test_run_example_success_path(monkeypatch):
-    def fake_run_dragin(query, context, dcfg, model=None, tokenizer=None):
+    def fake_run_dragin(query, context, dcfg, model=None, tokenizer=None, on_checkpoint=None):
         return {
             "answer": "3,677",
             "raw_generation": "... So the answer is: 3,677",
@@ -66,7 +66,7 @@ def test_run_example_success_path(monkeypatch):
 
 
 def test_run_example_failure_path_is_captured_not_raised(monkeypatch):
-    def failing_run_dragin(query, context, dcfg, model=None, tokenizer=None):
+    def failing_run_dragin(query, context, dcfg, model=None, tokenizer=None, on_checkpoint=None):
         raise RuntimeError("mlx not available on this box")
 
     monkeypatch.setattr(pipeline, "run_dragin", failing_run_dragin)
@@ -74,3 +74,31 @@ def test_run_example_failure_path_is_captured_not_raised(monkeypatch):
     assert rec["answer"] == ""
     assert "mlx not available" in rec["error"]
     assert rec["qid"] == "t1"  # record is still well-formed despite the failure
+
+
+def test_checkpoint_written_per_retrieval_and_merged_with_record(tmp_path):
+    ckpt_path = str(tmp_path / "run.checkpoint.json")
+
+    def run_dragin_with_checkpoints(query, context, dcfg, model=None, tokenizer=None, on_checkpoint=None):
+        # Simulate two retrievals, each checkpointing before the question finishes --
+        # this is what a kill between them should leave recoverable on disk.
+        on_checkpoint({"answer": "", "n_retrievals": 1, "partial": True})
+        on_checkpoint({"answer": "", "n_retrievals": 2, "partial": True})
+        return {"answer": "3,677", "n_retrievals": 2, "partial": False}
+
+    import json
+    from unittest import mock
+
+    with mock.patch("dragin_rlm.pipeline.run_dragin", run_dragin_with_checkpoints):
+        rec = pipeline.run_example(example(), cfg_for_dragin(), seed=0, checkpoint_path=ckpt_path)
+
+    # The final record is unaffected by checkpointing.
+    assert rec["answer"] == "3,677"
+    # But the checkpoint file was written, carries the question's own identity
+    # (qid/gold_answer from `record`, not just harness fields), and reflects
+    # the LAST checkpoint call, not the first.
+    ckpt = json.loads(open(ckpt_path).read())
+    assert ckpt["qid"] == "t1"
+    assert ckpt["gold_answer"] == "3,677"
+    assert ckpt["n_retrievals"] == 2
+    assert ckpt["partial"] is True

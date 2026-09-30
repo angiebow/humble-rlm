@@ -100,14 +100,25 @@ def main() -> None:
             )
             sys.exit(1)
 
+    # Written after every retrieval within the current question (harness.py's
+    # on_checkpoint) so a kill/crash loses at most the current in-flight
+    # segment, not the whole question -- see DRAGIN_RLM_TEST_RESULTS.md for
+    # why this exists: a real run was killed mid-question and every one of
+    # its 24 completed retrievals' worth of reasoning was unrecoverable
+    # because nothing had been written to disk yet for that question.
+    checkpoint_path = str(out) + ".checkpoint.json"
+
     with out.open("a", encoding="utf-8") as f:
         errors = 0
         for ex, s in tqdm(jobs):
-            rec = run_example(ex, cfg, s, model=model, tokenizer=tokenizer)
+            rec = run_example(
+                ex, cfg, s, model=model, tokenizer=tokenizer, checkpoint_path=checkpoint_path
+            )
             rec.pop("context", None)
             errors += int(bool(rec.get("error")))
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
             f.flush()
+            Path(checkpoint_path).unlink(missing_ok=True)
     print(f"done; {errors} runs recorded an error (see the 'error' field)")
 
 

@@ -46,7 +46,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from . import qfs, retrieval
 from .attention_probe import generate_with_probe, load_dragin_model
@@ -141,12 +141,50 @@ def _cue_line_complete(text: str) -> bool:
     return "\n" in text.split(ANSWER_CUE, 1)[1]
 
 
+def _build_result(
+    generated_text: str,
+    t0: float,
+    total_new_tokens: int,
+    segments_run: int,
+    triggers: List[Dict[str, Any]],
+    time_capped: bool,
+    cfg: DraginConfig,
+    max_rind_score: float,
+    max_rind_detail: Optional[Dict[str, Any]],
+    rind_checked_tokens: int,
+    rind_nonstopword_tokens: int,
+    partial: bool,
+) -> Dict[str, Any]:
+    """Shared by the final return and every checkpoint call so the two can
+    never drift out of sync with each other."""
+    return {
+        "answer": _extract_answer(generated_text),
+        "raw_generation": generated_text,
+        "latency_s": time.perf_counter() - t0,
+        "completion_tokens": total_new_tokens,
+        "llm_calls": segments_run + len(triggers),
+        "leaf_calls": len(triggers),
+        "root_iterations": segments_run,
+        "n_retrievals": len(triggers),
+        "time_capped": time_capped,
+        "rind_triggers": triggers,
+        "theta": cfg.theta,
+        "top_n": cfg.top_n,
+        "max_rind_score": max_rind_score,
+        "max_rind_detail": max_rind_detail,
+        "rind_checked_tokens": rind_checked_tokens,
+        "rind_nonstopword_tokens": rind_nonstopword_tokens,
+        "partial": partial,
+    }
+
+
 def run_dragin(
     query: str,
     context: str,
     cfg: DraginConfig,
     model: Any = None,
     tokenizer: Any = None,
+    on_checkpoint: Optional[Callable[[Dict[str, Any]], None]] = None,
 ) -> Dict[str, Any]:
     """Generate an answer to ``query`` over ``context`` with RIND-gated,
     QFS-sliced sub-calls. Returns a result dict compatible with gate_rlm's
@@ -156,6 +194,14 @@ def run_dragin(
     ``model``/``tokenizer`` can be passed in to reuse an already-loaded model
     across many examples (experiments/run_dragin.py does this -- loading a 35B
     model per example would be absurd); if omitted they're loaded fresh here.
+
+    ``on_checkpoint``, if given, is called with the same-shaped result dict
+    (``partial: True``) after every completed retrieval -- a single question
+    at a low theta can run for a very long time and hold many retrievals'
+    worth of real reasoning in memory with nothing on disk yet; killing the
+    process before it reaches a natural stop previously lost all of it. This
+    is the recovery point: whatever the last checkpoint call captured is the
+    most that's recoverable if the process dies mid-question.
     """
     if model is None or tokenizer is None:
         model, tokenizer = load_dragin_model(cfg.model_path)
@@ -252,6 +298,15 @@ def run_dragin(
             prefix=generated_text,
         )
 
+        if on_checkpoint is not None:
+            on_checkpoint(
+                _build_result(
+                    generated_text, t0, total_new_tokens, segments_run, triggers,
+                    time_capped, cfg, max_rind_score, max_rind_detail,
+                    rind_checked_tokens, rind_nonstopword_tokens, partial=True,
+                )
+            )
+
         if time.perf_counter() - seg_start > cfg.max_retrieval_seconds:
             time_capped = True
             break  # this retrieval cycle alone exceeded the cap -- stop here and
@@ -261,23 +316,8 @@ def run_dragin(
             # so there's something worth recording as-is rather than spending
             # more time trying to force a clean "So the answer is" cue.
 
-    answer = _extract_answer(generated_text)
-    latency = time.perf_counter() - t0
-    return {
-        "answer": answer,
-        "raw_generation": generated_text,
-        "latency_s": latency,
-        "completion_tokens": total_new_tokens,
-        "llm_calls": segments_run + len(triggers),
-        "leaf_calls": len(triggers),
-        "root_iterations": segments_run,
-        "n_retrievals": len(triggers),
-        "time_capped": time_capped,
-        "rind_triggers": triggers,
-        "theta": cfg.theta,
-        "top_n": cfg.top_n,
-        "max_rind_score": max_rind_score,
-        "max_rind_detail": max_rind_detail,
-        "rind_checked_tokens": rind_checked_tokens,
-        "rind_nonstopword_tokens": rind_nonstopword_tokens,
-    }
+    return _build_result(
+        generated_text, t0, total_new_tokens, segments_run, triggers, time_capped,
+        cfg, max_rind_score, max_rind_detail, rind_checked_tokens,
+        rind_nonstopword_tokens, partial=False,
+    )

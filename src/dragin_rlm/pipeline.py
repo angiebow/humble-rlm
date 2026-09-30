@@ -4,7 +4,9 @@ record, so eval/aggregate.py works unmodified across both construction tracks.
 
 from __future__ import annotations
 
+import json
 import traceback
+from pathlib import Path
 from typing import Any, Dict, Optional
 
 from gate_rlm.router import estimate_tokens
@@ -29,7 +31,12 @@ def dragin_config_from_cfg(cfg: dict) -> DraginConfig:
 
 
 def run_example(
-    example: dict, cfg: dict, seed: int, model: Any = None, tokenizer: Any = None
+    example: dict,
+    cfg: dict,
+    seed: int,
+    model: Any = None,
+    tokenizer: Any = None,
+    checkpoint_path: Optional[str] = None,
 ) -> Dict[str, Any]:
     record: Dict[str, Any] = {
         "config": cfg["name"],
@@ -45,10 +52,20 @@ def run_example(
         "context_tokens": example.get("context_tokens") or estimate_tokens(example["context"]),
         "models": {"root": cfg.get("dragin", {}).get("model_path"), **cfg["models"]},
     }
+
+    on_checkpoint = None
+    if checkpoint_path:
+        def on_checkpoint(partial: Dict[str, Any]) -> None:
+            ckpt = {**record, **partial}
+            tmp = Path(checkpoint_path).with_suffix(".tmp")
+            tmp.write_text(json.dumps(ckpt, ensure_ascii=False))
+            tmp.replace(checkpoint_path)  # atomic -- never leaves a half-written file
+
     try:
         dcfg = dragin_config_from_cfg(cfg)
         out = run_dragin(
-            example["query"], example["context"], dcfg, model=model, tokenizer=tokenizer
+            example["query"], example["context"], dcfg, model=model, tokenizer=tokenizer,
+            on_checkpoint=on_checkpoint,
         )
         record.update(out)
     except Exception as exc:  # keep going; failed runs are data too
