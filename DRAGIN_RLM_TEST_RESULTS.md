@@ -140,6 +140,32 @@ questions show `n_retrievals: 8` exactly), but it wastes one full prefill+genera
 cycle's worth of time. Worth moving the check to before starting a new segment rather
 than after.
 
+## theta lowered to 0.0001 (below the observed floor); smoke test, 2 fresh questions
+
+`results/table_dragin_smoke2_theta0.0001_per_question.csv` (`browsecomp-1058`,
+`browsecomp-242`, seed=57 -- don't overlap with any earlier sample). **0 errors.**
+Both questions hit `max_triggers: 8` (`root_iterations: 9`) and both `answer` fields
+came back as the literal 7-character string `<think>` -- `completion_tokens: 19`
+each, meaning essentially the entire `generate_length: 768` budget was consumed by
+the 8 retrieval segments' own generated text before the model could even close its
+first `<think>` tag, let alone answer. `f1: 0.0`, `semantic_accuracy: 0.000` for both.
+
+| | theta=0.003 (10 q, 4 triggered) | theta=0.0001 (2 q, both capped) |
+|---|---|---|
+| n_retrievals | 0-8 (mixed) | 8, 8 (both capped) |
+| latency | 81s-1425s | 841s, 1165s |
+| answer content | present (partial reasoning) | empty (`<think>` only) |
+
+Pushing theta far below the measured floor doesn't just increase retrieval
+frequency, it starves the token budget entirely -- every question now pays the
+`max_triggers` cost with nothing left to answer with. This is a clearer, harsher
+version of the same finding as the theta=0.003 run: more recursion here made
+things *strictly worse* (0/2 vs. partial credit before), not neutral. Confirms the
+`generate_length`/`max_triggers` budget interaction is the real bottleneck, not
+theta calibration precision -- retrieval segments need their own separate budget
+from answer generation, or `max_triggers` needs to scale down as `theta` goes down,
+otherwise a low enough theta always degenerates to this.
+
 ## Open items (tuning, not bugs)
 
 - The `max_triggers` off-by-one above (real waste, not correctness-affecting).
@@ -150,3 +176,7 @@ than after.
   if the worker itself isn't resolving the uncertainty (e.g. QFS's raw-subword-token
   query, or BM25 slicing missing the relevant passage), that's a different fix than "theta
   is still wrong."
+- New, sharper priority after theta=0.0001: separate the retrieval-segment token
+  budget from the answer-generation budget (or shrink `max_triggers` as `theta`
+  drops), since right now a low enough theta guarantees the model never reaches an
+  answer at all, independent of whether retrieval helped.
