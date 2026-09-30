@@ -1,16 +1,27 @@
 """Chain 10-question DRAGIN-RLM batches, each with fresh unique questions,
-until a wall-clock deadline. Written for a long unattended local run: round 1
-reuses whatever batch file already exists (so a batch prepared and started
-by hand isn't re-drawn), every later round samples a fresh set excluding
-every qid used so far (tracked in data/processed/used_qids_theta001.txt),
-and the consolidated per-question CSV is regenerated after every round so
-progress is visible even if the loop is stopped early.
+until a wall-clock deadline. Self-contained: starts the worker mlx_lm.server
++ litellm proxy itself if they aren't already up, and forces HF Hub into
+offline mode so it never tries to reach the network (everything it needs --
+root model, worker model, BrowseComp-Plus data, the semantic-similarity
+model -- is already cached locally from earlier runs).
 
-    python scripts/run_continuous_batches.py --hours 7
+Run it yourself, in your own terminal, from the repo root:
 
-Requires OPENAI_API_BASE / OPENAI_API_KEY for the worker's litellm calls --
-set below to point at the local proxy (configs/litellm_proxy.yaml), matching
-what scripts/start_mlx_local.sh's worker+proxy pair serve on.
+    .venv/bin/python scripts/run_continuous_batches.py --hours 7
+
+Round 1 reuses whatever data/processed/browsecomp_batch10_round1_theta001.jsonl
+already exists (so a batch prepared and started by hand isn't re-drawn);
+every later round samples a fresh set of 10, excluding every qid used so far
+(tracked in data/processed/used_qids_theta001.txt, gitignored). The
+consolidated per-question CSV (results/table_dragin_batch10_theta0.001_local_per_question.csv)
+is regenerated after every round, so you have a readable result on disk even
+if you stop the script (Ctrl-C) or it hits the deadline mid-round -- the
+current question's own progress is additionally checkpointed after every
+retrieval (harness.py's on_checkpoint), so at most one in-flight segment is
+ever at risk, never a whole question.
+
+Safe to run fully offline: this only ever talks to localhost (the worker
+server + proxy it starts) and reads already-downloaded files.
 """
 
 from __future__ import annotations
@@ -22,18 +33,72 @@ import random
 import subprocess
 import sys
 import time
+import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data/processed/browsecomp.jsonl"
 RUNS_DIR = ROOT / "results/runs"
+LOGS_DIR = ROOT / "logs"
 USED_QIDS_FILE = ROOT / "data/processed/used_qids_theta001.txt"
 BATCH_SIZE = 10
 CONFIG = ROOT / "configs/experiments/dragin_rlm.yaml"
 CSV_OUT = ROOT / "results/table_dragin_batch10_theta0.001_local_per_question.csv"
+VENV_BIN = ROOT / ".venv/bin"
+WORKER_MODEL = "mlx-community/Qwen3.5-0.8B-4bit"
 
 os.environ.setdefault("OPENAI_API_BASE", "http://localhost:4000/v1")
 os.environ.setdefault("OPENAI_API_KEY", "not-needed")
+# Everything needed (root model, worker model, dataset, semantic-similarity
+# model) is already cached from earlier runs -- offline mode skips the
+# network round-trip HF Hub would otherwise make to check for updates,
+# which is exactly the failure point if this runs with no internet.
+os.environ.setdefault("HF_HUB_OFFLINE", "1")
+os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+
+
+def _reachable(url: str) -> bool:
+    try:
+        urllib.request.urlopen(url, timeout=2)
+        return True
+    except Exception:
+        return False
+
+
+def ensure_local_servers() -> None:
+    LOGS_DIR.mkdir(exist_ok=True)
+    if not _reachable("http://localhost:8002/v1/models"):
+        print("Starting worker mlx_lm.server on :8002 ...", flush=True)
+        subprocess.Popen(
+            [
+                str(VENV_BIN / "mlx_lm.server"), "--model", WORKER_MODEL, "--port", "8002",
+                "--chat-template-args", '{"enable_thinking": false}',
+            ],
+            stdout=open(LOGS_DIR / "mlx_worker.log", "a"),
+            stderr=subprocess.STDOUT,
+            start_new_session=True,  # survives this script exiting
+        )
+        for _ in range(60):
+            if _reachable("http://localhost:8002/v1/models"):
+                break
+            time.sleep(2)
+        else:
+            sys.exit("worker mlx_lm.server never came up on :8002 -- check logs/mlx_worker.log")
+
+    if not _reachable("http://localhost:4000/v1/models"):
+        print("Starting litellm proxy on :4000 ...", flush=True)
+        subprocess.Popen(
+            [str(VENV_BIN / "litellm"), "--config", str(ROOT / "configs/litellm_proxy.yaml"), "--port", "4000"],
+            stdout=open(LOGS_DIR / "litellm_proxy.log", "a"),
+            stderr=subprocess.STDOUT,
+            start_new_session=True,
+        )
+        for _ in range(60):
+            if _reachable("http://localhost:4000/v1/models"):
+                break
+            time.sleep(2)
+        else:
+            sys.exit("litellm proxy never came up on :4000 -- check logs/litellm_proxy.log")
 
 
 def load_used() -> set:
@@ -63,6 +128,8 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--hours", type=float, default=7.0)
     args = ap.parse_args()
+
+    ensure_local_servers()
 
     deadline = time.time() + args.hours * 3600
     used = load_used()
