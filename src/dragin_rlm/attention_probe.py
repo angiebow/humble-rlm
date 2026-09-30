@@ -22,12 +22,17 @@ Two adaptations versus the paper, both specific to Qwen3.5-35B-A3B:
 2. UNFUSED ATTENTION. mlx-lm's attention path calls the fused
    ``mx.fast.scaled_dot_product_attention`` kernel, which never materializes the
    softmax(QK^T) matrix, so it can't be read after the fact. _patch_attention_layer
-   replaces that one layer's ``__call__`` at the INSTANCE level with an unfused
-   reimplementation (manual QK^T -> causal mask -> softmax -> matmul-V) that
-   reproduces mlx_lm.models.qwen3_next.Qwen3NextAttention.__call__ line for line
-   except for that one substitution -- re-check against mlx-lm's source if this
-   starts failing verify_against_fused(), since it will drift if mlx-lm's
-   attention implementation changes.
+   replaces ``type(layer.self_attn).__call__`` at the CLASS level (Python looks up
+   dunder methods on the type, not the instance, for implicit calls like
+   ``attn(x, ...)`` -- an instance-level patch is silently never invoked; an
+   earlier version of this got that wrong, see _patch_attention_layer's
+   docstring), guarded so only the ONE targeted instance actually diverges from
+   the true original -- an unfused reimplementation (manual QK^T -> causal mask
+   -> softmax -> matmul-V) that reproduces
+   mlx_lm.models.qwen3_next.Qwen3NextAttention.__call__ line for line except for
+   that one substitution -- re-check against mlx-lm's source if this starts
+   failing verify_against_fused(), since it will drift if mlx-lm's attention
+   implementation changes.
 
 IMPORTANT: do not drive this with ``mlx_lm.generate_step``. That generator
 computes step n+1 via ``mx.async_eval`` *before* yielding step n (latency hiding),
@@ -72,55 +77,76 @@ def _find_last_attention_layer(model: Any) -> Any:
 
 def _patch_attention_layer(
     layer: Any, on_probs: Callable[[Any], None]
-) -> Callable[..., Any]:
-    """Replace ``layer.self_attn.__call__`` with an unfused equivalent that
-    reports the softmax attention matrix via ``on_probs`` before returning
-    exactly the output the fused kernel would have. Returns the original bound
-    method so the caller can restore it (``attn.__call__ = original_call``).
+) -> Tuple[type, Callable[..., Any]]:
+    """Replace ``type(layer.self_attn).__call__`` with an unfused equivalent
+    that reports the softmax attention matrix via ``on_probs`` before returning
+    exactly the output the fused kernel would have -- but ONLY for the specific
+    ``layer.self_attn`` instance; every other instance of the same class (other
+    full-attention layers, or a second model loaded in the same process, as
+    verify_against_fused's own internal load does) falls through unchanged to
+    the true original implementation.
+
+    Patching the class rather than the instance is deliberate, not incidental:
+    ``attn.__call__ = fn`` sets an INSTANCE attribute, but Python looks up
+    dunder methods like ``__call__`` on the TYPE when the implicit call syntax
+    (``attn(x, ...)``) is used -- the instance attribute is silently never
+    consulted. An earlier version of this function patched the instance and
+    passed verify_against_fused() with max|delta logits| == 0, which in
+    hindsight was itself the tell: an independently-derived unfused
+    reimplementation essentially never reproduces a fused kernel's output
+    bit-for-bit, only "the patch never actually ran" does. Caught for real by
+    generate_with_probe's own captured-nothing guard on first real use.
+
+    Returns (attn_cls, original_call) so the caller can restore exactly:
+    ``attn_cls.__call__ = original_call``.
 
     Reimplements mlx_lm.models.qwen3_next.Qwen3NextAttention.__call__.
     """
     import mlx.core as mx
 
     attn = layer.self_attn
-    original_call = attn.__call__
+    attn_cls = type(attn)
+    original_call = attn_cls.__call__
 
-    def patched_call(x, mask=None, cache=None):
+    def patched_call(self, x, mask=None, cache=None):
+        if self is not attn:
+            return original_call(self, x, mask=mask, cache=cache)
+
         B, L, D = x.shape
-        q_proj_output = attn.q_proj(x)
+        q_proj_output = self.q_proj(x)
         queries, gate = mx.split(
-            q_proj_output.reshape(B, L, attn.num_attention_heads, -1), 2, axis=-1
+            q_proj_output.reshape(B, L, self.num_attention_heads, -1), 2, axis=-1
         )
         gate = gate.reshape(B, L, -1)
-        keys, values = attn.k_proj(x), attn.v_proj(x)
+        keys, values = self.k_proj(x), self.v_proj(x)
 
-        queries = attn.q_norm(queries).transpose(0, 2, 1, 3)
-        keys = attn.k_norm(
-            keys.reshape(B, L, attn.num_key_value_heads, -1)
+        queries = self.q_norm(queries).transpose(0, 2, 1, 3)
+        keys = self.k_norm(
+            keys.reshape(B, L, self.num_key_value_heads, -1)
         ).transpose(0, 2, 1, 3)
-        values = values.reshape(B, L, attn.num_key_value_heads, -1).transpose(
+        values = values.reshape(B, L, self.num_key_value_heads, -1).transpose(
             0, 2, 1, 3
         )
 
         if cache is not None:
-            queries = attn.rope(queries, offset=cache.offset)
-            keys = attn.rope(keys, offset=cache.offset)
+            queries = self.rope(queries, offset=cache.offset)
+            keys = self.rope(keys, offset=cache.offset)
             keys, values = cache.update_and_fetch(keys, values)
         else:
-            queries = attn.rope(queries)
-            keys = attn.rope(keys)
+            queries = self.rope(queries)
+            keys = self.rope(keys)
 
         n_kv_heads = keys.shape[1]
-        n_repeats = attn.num_attention_heads // n_kv_heads
+        n_repeats = self.num_attention_heads // n_kv_heads
         S = keys.shape[2]
 
         if n_repeats > 1:
             q4 = queries.reshape(B, n_kv_heads, n_repeats, L, -1)
             k4 = mx.expand_dims(keys, 2)
             v4 = mx.expand_dims(values, 2)
-            scores = (q4 * attn.scale) @ k4.swapaxes(-1, -2)
+            scores = (q4 * self.scale) @ k4.swapaxes(-1, -2)
         else:
-            scores = (queries * attn.scale) @ keys.swapaxes(-1, -2)
+            scores = (queries * self.scale) @ keys.swapaxes(-1, -2)
 
         if L > 1:
             # Causal mask derived from shapes alone -- correct for both the
@@ -137,8 +163,8 @@ def _patch_attention_layer(
         probs = mx.softmax(scores.astype(mx.float32), axis=-1).astype(scores.dtype)
 
         if n_repeats > 1:
-            output = (probs @ v4).reshape(B, attn.num_attention_heads, L, -1)
-            probs_full = probs.reshape(B, attn.num_attention_heads, L, S)
+            output = (probs @ v4).reshape(B, self.num_attention_heads, L, -1)
+            probs_full = probs.reshape(B, self.num_attention_heads, L, S)
         else:
             output = probs @ values
             probs_full = probs
@@ -146,10 +172,10 @@ def _patch_attention_layer(
         on_probs(probs_full)
 
         output = output.transpose(0, 2, 1, 3).reshape(B, L, -1)
-        return attn.o_proj(output * mx.sigmoid(gate))
+        return self.o_proj(output * mx.sigmoid(gate))
 
-    attn.__call__ = patched_call
-    return original_call
+    attn_cls.__call__ = patched_call
+    return attn_cls, original_call
 
 
 def load_dragin_model(model_path: str) -> Tuple[Any, Any]:
@@ -181,7 +207,7 @@ def generate_with_probe(
     def _on_probs(probs_full: Any) -> None:
         captured[0] = probs_full
 
-    original_call = _patch_attention_layer(probe_layer, _on_probs)
+    attn_cls, original_call = _patch_attention_layer(probe_layer, _on_probs)
     sampler = make_sampler(temp=temperature)
     try:
         prompt_tokens = mx.array(tokenizer.encode(prompt))
@@ -219,7 +245,7 @@ def generate_with_probe(
                 return
             token, logprobs = step(token.reshape(1))
     finally:
-        probe_layer.self_attn.__call__ = original_call
+        attn_cls.__call__ = original_call
 
 
 def verify_against_fused(
@@ -244,12 +270,12 @@ def verify_against_fused(
     mx.eval(baseline_logits)
 
     layer = _find_last_attention_layer(model)
-    original_call = _patch_attention_layer(layer, lambda _probs: None)
+    attn_cls, original_call = _patch_attention_layer(layer, lambda _probs: None)
     try:
         patched_logits = model(tokens, cache=make_prompt_cache(model))
         mx.eval(patched_logits)
     finally:
-        layer.self_attn.__call__ = original_call
+        attn_cls.__call__ = original_call
 
     diff = float(mx.abs(baseline_logits - patched_logits).max())
     ok = diff < atol
