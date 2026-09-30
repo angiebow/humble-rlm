@@ -82,10 +82,16 @@ class DraginConfig:
     theta: float = 1.0           # [SWEEP] RIND trigger threshold
     top_n: int = 25              # QFS query length (paper Table 9 range: 25-35)
     generate_length: int = 256   # total root tokens budget across all segments
-    max_triggers: int = 8        # safety cap; the paper has no bound on retrieval count
+    max_retrieval_seconds: float = 600.0  # wall-clock cap per retrieval cycle (root
+                                  # generation to the trigger + worker sub-call +
+                                  # next-prompt rebuild). No cap on retrieval COUNT --
+                                  # the paper leaves that unbounded too -- but the first
+                                  # retrieval cycle that takes longer than this many
+                                  # seconds is treated as the last one; no further
+                                  # triggers are allowed after it.
     min_answer_tokens: int = 128 # guaranteed, trigger-immune budget for the final
-                                  # answer pass once max_triggers is reached -- tops
-                                  # up whatever's left of generate_length if it's
+                                  # answer pass once the retrieval-time cap is hit --
+                                  # tops up whatever's left of generate_length if it's
                                   # smaller than this. Without it, a low enough theta
                                   # makes every segment (including the last) get cut
                                   # off after a couple of tokens, so the run ends with
@@ -175,8 +181,10 @@ def run_dragin(
     rind_checked_tokens = 0
     rind_nonstopword_tokens = 0
 
-    while budget > 0 and len(triggers) < cfg.max_triggers:
+    time_capped = False
+    while budget > 0:
         segments_run += 1
+        seg_start = time.perf_counter()
         stream = generate_with_probe(
             model, tokenizer, prompt, max_tokens=budget, temperature=cfg.temperature
         )
@@ -244,14 +252,19 @@ def run_dragin(
             prefix=generated_text,
         )
 
-    # max_triggers reached with no answer cue yet: a further RIND trigger here
-    # can't lead to another retrieval, so checking theta at all would only cut
-    # this pass off after a token or two and discard it for nothing -- give the
-    # model one uninterrupted shot at finishing, with at least min_answer_tokens
-    # even if generate_length's shared budget is already spent (see
-    # DRAGIN_RLM_TEST_RESULTS.md, theta=0.0001: every segment including this one
-    # was getting cut at ~2 tokens, so the run ended with literally no answer).
-    if len(triggers) >= cfg.max_triggers and not _cue_line_complete(generated_text):
+        if time.perf_counter() - seg_start > cfg.max_retrieval_seconds:
+            time_capped = True
+            break  # this retrieval cycle alone exceeded the cap -- no more triggers
+
+    # Retrieval-time cap hit with no answer cue yet: a further RIND trigger here
+    # can't lead to another retrieval (we're done triggering either way), so
+    # checking theta at all would only cut this pass off after a token or two
+    # and discard it for nothing -- give the model one uninterrupted shot at
+    # finishing, with at least min_answer_tokens even if generate_length's
+    # shared budget is already spent (see DRAGIN_RLM_TEST_RESULTS.md,
+    # theta=0.0001: every segment including this one was getting cut at ~2
+    # tokens, so the run ended with literally no answer).
+    if time_capped and not _cue_line_complete(generated_text):
         segments_run += 1
         final_budget = max(budget, cfg.min_answer_tokens)
         stream = generate_with_probe(
@@ -277,6 +290,7 @@ def run_dragin(
         "leaf_calls": len(triggers),
         "root_iterations": segments_run,
         "n_retrievals": len(triggers),
+        "time_capped": time_capped,
         "rind_triggers": triggers,
         "theta": cfg.theta,
         "top_n": cfg.top_n,

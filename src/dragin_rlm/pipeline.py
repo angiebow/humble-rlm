@@ -20,7 +20,7 @@ def dragin_config_from_cfg(cfg: dict) -> DraginConfig:
         theta=d.get("theta", 1.0),
         top_n=d.get("top_n", 25),
         generate_length=d.get("generate_length", 256),
-        max_triggers=d.get("max_triggers", 8),
+        max_retrieval_seconds=d.get("max_retrieval_seconds", 600.0),
         min_answer_tokens=d.get("min_answer_tokens", 128),
         retrieval_top_k=d.get("retrieval_top_k", 3),
         passage_chars=d.get("passage_chars", 1000),
