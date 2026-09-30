@@ -81,6 +81,8 @@ def main() -> None:
             "latency_s",
             "completion_tokens",
             "n_retrievals",
+            "root_iterations",
+            "max_rind_score",
             "error",
         )
         if c in df.columns
