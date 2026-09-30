@@ -27,6 +27,9 @@ results/figures/*
 .cache/
 hf_cache/
 
+# Local server logs (scripts/start_mlx_local.sh, or the worker/proxy started by hand)
+logs/
+
 # OS / editors
 .DS_Store
 .idea/

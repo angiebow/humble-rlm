@@ -166,6 +166,47 @@ theta calibration precision -- retrieval segments need their own separate budget
 from answer generation, or `max_triggers` needs to scale down as `theta` goes down,
 otherwise a low enough theta always degenerates to this.
 
+## Local Mac run: Qwen3.5-4B root + Qwen3.5-0.8B worker, theta=0.0001, both fixes applied
+
+Machine: this Mac (Apple M5, 24GB total RAM) -- swapped down from the 256GB
+jupyter-01/macos-proj-01 hardware above, root `mlx-community/Qwen3.5-4B-4bit`
+(direct mlx-lm, in-process) + worker `mlx-community/Qwen3.5-0.8B-4bit` (via
+`mlx_lm.server` + `configs/litellm_proxy.yaml`). `verify_against_fused()`
+**PASS** on the 4B model (confirms the unfused-attention patch generalizes
+beyond the 35B-A3B MoE it was originally validated against).
+
+Same 2 questions as the interrupted jupyter-01 rerun (`browsecomp-1058`,
+`browsecomp-242`, seed=57), same `theta: 0.0001`, both the `max_triggers`
+budget-starvation fix and the answer-cue-truncation fix in place.
+`results/table_dragin_smoke2_theta0.0001_local_per_question.csv`. **0 errors**,
+26m22s + 36m10s (much slower than hoped despite the much smaller models --
+each retrieval still re-prefills the full ~420-450K-character document from
+scratch, and prefill cost doesn't shrink as fast as parameter count does).
+
+**Both harness fixes confirmed mechanically working on the new models:**
+`n_retrievals: 8`, `root_iterations: 9` (8 capped triggers + exactly one
+guaranteed final pass) on both questions, `completion_tokens` jumped from the
+old broken run's 19 to 107 and 95 -- the final pass is no longer getting cut
+off after a couple of tokens.
+
+**But a new failure mode, not seen on the 35B model:** both questions'
+`answer` came back as the literal string `<short answer>'.` -- the smaller
+4B model, instead of reasoning over the document, spent its final pass
+restating the prompt's own task instructions verbatim ("Constraint: Reason
+step by step, then end the answer with 'So the answer is: <short answer>'.")
+and `_cue_line_complete()` correctly-but-uselessly matched the cue phrase
+*inside that quoted instruction text* -- a real edge case the newline
+heuristic doesn't rule out. `f1: 0.0`, `semantic_accuracy: 0.000` on both.
+
+This isn't the harness-fix logic breaking; it's the smaller model rarely
+getting past its own opening planning/meta-commentary before RIND interrupts
+it again (theta=0.0001 triggers on almost the first non-stopword token), so
+even the guaranteed-budget final pass mostly just restates the task instead
+of answering. Open question for next time: does raising theta back toward
+the 0.003 line (which produced real partial reasoning on the 35B model) fix
+this on the 4B/0.8B pairing too, or is a smaller root model simply worse at
+holding onto the actual instruction-following task once interrupted?
+
 ## Open items (tuning, not bugs)
 
 - The `max_triggers` off-by-one above (real waste, not correctness-affecting).
