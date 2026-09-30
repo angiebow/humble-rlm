@@ -12,7 +12,11 @@ license = { text = "MIT" }
 dependencies = [
     # Pinned for reproducibility: the RLM implementation GATE-RLM extends.
     "recursive-llm @ git+https://github.com/grishahq/recursive-llm.git@b81ab894d4190757a632822478f454f8b9c6275c",
-    "litellm>=1.0.0,<1.98.0",
+    "litellm[proxy]>=1.0.0,<1.98.0",
+    # litellm[proxy]'s own metadata allows fastapi up to 0.142, but the proxy's
+    # internal code still imports fastapi.dependencies.utils.get_flat_dependant,
+    # which fastapi removed well before 0.142 -- pinned below that break.
+    "fastapi<0.120",
     "sentence-transformers>=3.0",
     "datasets>=2.19",
     "numpy>=1.26",
@@ -28,6 +32,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=7.0"]
 tokens = ["tiktoken>=0.7"]
+mlx = ["mlx-lm>=0.28"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
