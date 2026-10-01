@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -73,6 +74,16 @@ def main() -> None:
     dataset = examples[0]["dataset"] if examples else "empty"
     out = Path(args.out or f"{cfg['logging']['out_dir']}/{cfg['name']}__{dataset}__{args.split}.jsonl")
     out.parent.mkdir(parents=True, exist_ok=True)
+
+    # Thinking mode is switched off only from round N onward (config key
+    # dragin.disable_thinking_from_round), keyed on the "round<N>" in the output
+    # file name that scripts/run_continuous_batches*.py use. Runs whose output name
+    # carries no round number, and earlier rounds, are completely unaffected.
+    from_round = cfg.get("dragin", {}).get("disable_thinking_from_round")
+    m = re.search(r"round(\d+)", out.name)
+    if from_round is not None and m and int(m.group(1)) >= int(from_round):
+        cfg["dragin"]["disable_thinking"] = True
+        print(f"thinking mode DISABLED (round {m.group(1)} >= {from_round})")
 
     done = set()
     if out.exists():

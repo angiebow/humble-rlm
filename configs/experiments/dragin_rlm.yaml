@@ -49,3 +49,7 @@ dragin:
   retrieval_top_k: 3     # passages handed to the worker per trigger
   passage_chars: 1000
   temperature: 0.0
+  disable_thinking_from_round: 2  # from round 2 of the continuous runners onward, render the
+                          # prompt via the chat template with enable_thinking=False. Round 1
+                          # (and any run whose --out has no "round<N>") is unchanged: raw
+                          # completion prompt, model free to emit its own <think> block.

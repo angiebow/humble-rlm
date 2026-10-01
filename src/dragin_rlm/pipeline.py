@@ -27,6 +27,7 @@ def dragin_config_from_cfg(cfg: dict) -> DraginConfig:
         retrieval_top_k=d.get("retrieval_top_k", 3),
         passage_chars=d.get("passage_chars", 1000),
         temperature=d.get("temperature", 0.0),
+        disable_thinking=d.get("disable_thinking", False),
     )
 
 

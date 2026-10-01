@@ -100,6 +100,30 @@ class DraginConfig:
     retrieval_top_k: int = 3     # passages handed to the worker per trigger
     passage_chars: int = 1000
     temperature: float = 0.0
+    disable_thinking: bool = False  # render the prompt through the model's chat
+                                  # template with enable_thinking=False (the
+                                  # empty "<think></think>" block is part of the
+                                  # prompt, not generated). Off = the original raw
+                                  # "...Answer:" completion prompt, unchanged.
+
+
+def _render_prompt(template: str, tokenizer: Any, disable_thinking: bool, prefix: str = "", **fields) -> str:
+    """Fill ``template`` and return the text to feed the model. With thinking left
+    alone (the default) this is exactly ``template.format(..., prefix=prefix)``,
+    byte-for-byte what the harness always built. With ``disable_thinking`` the
+    template minus ``prefix`` becomes the user turn of the model's chat template
+    (enable_thinking=False), and ``prefix`` -- the already-generated text -- is
+    appended after the assistant header so generation resumes mid-answer."""
+    if not disable_thinking:
+        return template.format(prefix=prefix, **fields)
+    user_text = template.format(prefix="", **fields)
+    head = tokenizer.apply_chat_template(
+        [{"role": "user", "content": user_text}],
+        tokenize=False,
+        add_generation_prompt=True,
+        enable_thinking=False,
+    )
+    return head + prefix
 
 
 def _call_worker(worker_model: str, query: str, passages: str) -> str:
@@ -229,7 +253,9 @@ def run_dragin(
         model, tokenizer = load_dragin_model(cfg.model_path)
 
     t0 = time.perf_counter()
-    prompt = DIRECT_PROMPT.format(context=context, query=query)
+    prompt = _render_prompt(
+        DIRECT_PROMPT, tokenizer, cfg.disable_thinking, context=context, query=query
+    )
     state = RindState()
     generated_text = ""
     triggers: List[Dict[str, Any]] = []
@@ -311,7 +337,10 @@ def run_dragin(
             }
         )
 
-        prompt = RETRIEVAL_TEMPLATE.format(
+        prompt = _render_prompt(
+            RETRIEVAL_TEMPLATE,
+            tokenizer,
+            cfg.disable_thinking,
             context=context,
             passages=f"[1] {passages}\n(worker's read: {worker_answer})"
             if passages
