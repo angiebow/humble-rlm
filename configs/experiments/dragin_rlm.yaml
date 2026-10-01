@@ -10,11 +10,10 @@ mode: dragin
 models:
   worker: openai/qwen35-worker   # sub-call answering over a QFS-selected slice; regular litellm/REST
 dragin:
-  model_path: "mlx-community/Qwen3.5-4B-4bit"  # root; loaded directly, no litellm alias.
-                                                # Swapped down from Qwen3.5-35B-A3B-4bit
-                                                # for a local run on this Mac (24GB total
-                                                # RAM -- the 35B-A3B MoE doesn't fit
-                                                # alongside everything else running here).
+  model_path: "mlx-community/Qwen3.5-35B-A3B-4bit"  # root; loaded directly, no litellm alias.
+                                                # Back on the 35B-A3B MoE for the Mac Studio
+                                                # (256GB). The 4B swap was only for the 24GB
+                                                # laptop -- see git history (3b43b98).
   theta: 0.001            # [SWEEP] RIND trigger threshold. Paper Table 9 suggests 0.6-1.5,
                           # but that's calibrated on ~200-1500-token contexts (Wikipedia
                           # passages, generate_length 64-128); BrowseComp-Plus documents run

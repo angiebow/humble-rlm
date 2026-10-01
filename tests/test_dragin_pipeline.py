@@ -29,7 +29,7 @@ def cfg_for_dragin():
 def test_dragin_config_from_cfg_reads_the_dragin_block():
     cfg = cfg_for_dragin()
     dcfg = pipeline.dragin_config_from_cfg(cfg)
-    assert dcfg.model_path == "mlx-community/Qwen3.5-4B-4bit"
+    assert dcfg.model_path == "mlx-community/Qwen3.5-35B-A3B-4bit"
     assert dcfg.worker_model == "openai/qwen35-worker"
     assert dcfg.theta == 0.001
     assert dcfg.top_n == 25

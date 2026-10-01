@@ -10,7 +10,7 @@ model_list:
       api_key: "not-needed"
   - model_name: qwen35-worker
     litellm_params:
-      model: openai/mlx-community/Qwen3.5-0.8B-4bit
+      model: openai/mlx-community/Qwen3.5-2B-bf16
       api_base: http://localhost:8002/v1
       api_key: "not-needed"
 

@@ -1,9 +1,8 @@
 """Chain 10-question DRAGIN-RLM batches, each with fresh unique questions,
 until a wall-clock deadline. Self-contained: starts the worker mlx_lm.server
-+ litellm proxy itself if they aren't already up, and forces HF Hub into
-offline mode so it never tries to reach the network (everything it needs --
-root model, worker model, BrowseComp-Plus data, the semantic-similarity
-model -- is already cached locally from earlier runs).
++ litellm proxy itself if they aren't already up. Pass --offline to force HF
+Hub offline once root model, worker model, BrowseComp-Plus data and the
+semantic-similarity model are all cached.
 
 Run it yourself, in your own terminal, from the repo root:
 
@@ -22,8 +21,9 @@ elapsed) and checkpoints to disk (harness.py's on_checkpoint), so at most
 one in-flight segment is ever at risk, never a whole question, and you're
 never watching a silent terminal for an hour.
 
-Safe to run fully offline: this only ever talks to localhost (the worker
-server + proxy it starts) and reads already-downloaded files.
+Offline-safe with --offline once everything is cached: this only talks to
+localhost (the worker server + proxy it starts) and reads downloaded files.
+Without --offline it may reach HF Hub to fetch missing models first.
 """
 
 from __future__ import annotations
@@ -46,8 +46,11 @@ USED_QIDS_FILE = ROOT / "data/processed/used_qids_theta001.txt"
 BATCH_SIZE = 10
 CONFIG = ROOT / "configs/experiments/dragin_rlm.yaml"
 CSV_OUT = ROOT / "results/table_dragin_batch10_theta0.001_local_per_question.csv"
-VENV_BIN = ROOT / ".venv/bin"
-WORKER_MODEL = "mlx-community/Qwen3.5-0.8B-4bit"
+# Resolve the mlx_lm.server / litellm executables from whichever environment is
+# running this script (works for ./.venv, ~/.venv, conda, ...), not a hardcoded
+# repo-local .venv that only exists on the laptop.
+VENV_BIN = Path(sys.executable).parent
+WORKER_MODEL = "mlx-community/Qwen3.5-2B-bf16"
 
 os.environ.setdefault("OPENAI_API_BASE", "http://localhost:4000/v1")
 os.environ.setdefault("OPENAI_API_KEY", "not-needed")
@@ -55,8 +58,8 @@ os.environ.setdefault("OPENAI_API_KEY", "not-needed")
 # model) is already cached from earlier runs -- offline mode skips the
 # network round-trip HF Hub would otherwise make to check for updates,
 # which is exactly the failure point if this runs with no internet.
-os.environ.setdefault("HF_HUB_OFFLINE", "1")
-os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+# Offline mode is opt-in (--offline): on a machine that hasn't downloaded the
+# models yet (e.g. a fresh Mac Studio) forcing it would fail on the first load.
 
 
 def _reachable(url: str) -> bool:
@@ -129,7 +132,14 @@ def run(cmd: list) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--hours", type=float, default=7.0)
+    ap.add_argument(
+        "--offline", action="store_true",
+        help="force HF Hub offline (only if every model + dataset is already cached)",
+    )
     args = ap.parse_args()
+    if args.offline:
+        os.environ["HF_HUB_OFFLINE"] = "1"
+        os.environ["TRANSFORMERS_OFFLINE"] = "1"
 
     ensure_local_servers()
 

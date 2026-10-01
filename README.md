@@ -183,9 +183,10 @@ run if it fails (`--skip-verify` to override).
 `configs/experiments/dragin_rlm.yaml`'s `dragin.model_path` and `models.worker` are both
 swappable independent of each other: the root model is loaded directly (no litellm), the
 worker goes through `configs/litellm_proxy.yaml` -> `mlx_lm.server`. Currently set to
-Qwen3.5-4B (root) + Qwen3.5-0.8B (worker, both 4-bit) for local runs on a memory-limited
-Mac; the earlier hardware-validation runs (`DRAGIN_RLM_TEST_RESULTS.md`) used
-Qwen3.5-35B-A3B-4bit (root) + Qwen3.5-2B-bf16 (worker) on a 256GB machine.
+Qwen3.5-35B-A3B-4bit (root) + Qwen3.5-2B-bf16 (worker) for 256GB machines (Mac Studio).
+The earlier local-laptop runs used Qwen3.5-4B (root) + Qwen3.5-0.8B (worker, both 4-bit) on
+a 24GB Mac; to go back, change `dragin.model_path`, `configs/litellm_proxy.yaml` and
+`WORKER_MODEL` in `scripts/run_continuous_batches.py`.
 
 ```bash
 python experiments/run_dragin.py --config configs/experiments/dragin_rlm.yaml \
