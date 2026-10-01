@@ -1,0 +1,21 @@
+# litellm proxy for the multi-dataset suitability probe (scripts/run_multidata_suitability.py):
+# worker = Qwen3.5-0.8B-4bit (reuses the mlx_lm.server already running on :8002 for
+# other local DRAGIN-RLM work on this machine -- same model, just a correctly-labeled
+# alias here rather than editing the shared configs/litellm_proxy.yaml, which jupyter-01
+# also pulls and whose worker entry (Qwen3.5-2B-bf16) is correct for ITS own servers).
+# Root (Qwen3.5-2B-4bit) is loaded directly via mlx-lm, not through this proxy -- same
+# as every other DRAGIN-RLM config.
+model_list:
+  - model_name: qwen35-worker-multidata
+    litellm_params:
+      model: openai/mlx-community/Qwen3.5-0.8B-4bit
+      api_base: http://localhost:8002/v1
+      api_key: "not-needed"
+
+general_settings:
+  port: 4001
+
+router_settings:
+  disable_cooldowns: true
+  allowed_fails: 999999
+  cooldown_time: 0

@@ -1,0 +1,26 @@
+# DRAGIN-RLM multi-dataset suitability probe (scripts/run_multidata_suitability.py):
+# one question from each of BABILong, BrowseComp-Plus, HotpotQA, OOLONG, and
+# Repo-Level CodeQA, same model/theta/caps across all five, to see which task
+# shapes this system is actually suited to. Deliberately smaller models than
+# the other dragin_rlm*.yaml configs (root 2B, worker 0.8B) -- this is a
+# breadth probe across very different context shapes and lengths, not a
+# calibrated accuracy run, so fast iteration matters more than raw capability
+# here. Separate from configs/experiments/dragin_rlm.yaml (35B root, used by
+# the ongoing theta sweep on jupyter-01) and configs/litellm_proxy.yaml
+# (shared with jupyter-01) -- this config and its proxy
+# (configs/litellm_proxy_multidata.yaml) are self-contained so this probe
+# can't disturb either of those.
+name: dragin_rlm_multidata
+mode: dragin
+models:
+  worker: openai/qwen35-worker-multidata
+dragin:
+  model_path: "mlx-community/Qwen3.5-2B-4bit"  # root; loaded directly, no litellm alias
+  theta: 0.001            # same calibrated value as the main theta sweep (dragin_rlm.yaml)
+  top_n: 25
+  generate_length: 768
+  max_retrieval_seconds: 600
+  max_triggers: 20
+  retrieval_top_k: 3
+  passage_chars: 1000
+  temperature: 0.0
