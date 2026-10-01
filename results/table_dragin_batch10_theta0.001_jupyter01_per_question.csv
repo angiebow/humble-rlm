@@ -1,0 +1,4 @@
+config,qid,gold_answer,answer,answer_source,f1,semantic_sim,latency_s,completion_tokens,n_retrievals,root_iterations,max_rind_score
+dragin_rlm,browsecomp-1131,Albert Pike,"<think>
+
+</think>",raw_reasoning,0.0,0.4798668324947357,4090.4481078330427,45,20,20,0.004989287230139694
