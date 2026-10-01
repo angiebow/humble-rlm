@@ -1,0 +1,19 @@
+# litellm proxy for the multi-dataset suitability probe's 2b_4b tier
+# (scripts/run_multidata_suitability.py --tier 2b_4b): worker = Qwen3.5-2B-4bit
+# on its own mlx_lm.server (:8003) and its own proxy (:4002) -- separate from
+# the 08b_2b tier's :8002/:4001 and the main dragin_rlm.yaml setup's :4000, so
+# all three can coexist without interfering with each other.
+model_list:
+  - model_name: qwen35-worker-multidata-2b4b
+    litellm_params:
+      model: openai/mlx-community/Qwen3.5-2B-4bit
+      api_base: http://localhost:8003/v1
+      api_key: "not-needed"
+
+general_settings:
+  port: 4002
+
+router_settings:
+  disable_cooldowns: true
+  allowed_fails: 999999
+  cooldown_time: 0

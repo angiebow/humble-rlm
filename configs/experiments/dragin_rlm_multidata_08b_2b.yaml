@@ -8,9 +8,13 @@
 # here. Separate from configs/experiments/dragin_rlm.yaml (35B root, used by
 # the ongoing theta sweep on jupyter-01) and configs/litellm_proxy.yaml
 # (shared with jupyter-01) -- this config and its proxy
-# (configs/litellm_proxy_multidata.yaml) are self-contained so this probe
-# can't disturb either of those.
-name: dragin_rlm_multidata
+# (configs/litellm_proxy_multidata_08b_2b.yaml) are self-contained so this
+# probe can't disturb either of those. One of several tiers (see
+# scripts/run_multidata_suitability.py's TIERS dict) run over the identical
+# 5-question probe set at increasing model capacity -- 08b_2b here, then
+# 2b_4b (dragin_rlm_multidata_2b_4b.yaml), directly comparable since only
+# the model pair changes.
+name: dragin_rlm_multidata_08b_2b
 mode: dragin
 models:
   worker: openai/qwen35-worker-multidata
