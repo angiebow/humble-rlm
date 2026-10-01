@@ -52,6 +52,10 @@ def main() -> None:
     ap.add_argument("--limit", type=int, default=None, help="max examples (smoke tests)")
     ap.add_argument("--seeds", type=int, nargs="+", default=[0])
     ap.add_argument("--filter", default=None, help="substring that qid must contain")
+    ap.add_argument(
+        "--theta", type=float, default=None,
+        help="override the RIND trigger threshold from --config, for theta-sweep runs",
+    )
     ap.add_argument("--out", default=None)
     ap.add_argument(
         "--skip-verify",
@@ -62,6 +66,8 @@ def main() -> None:
 
     load_dotenv()
     cfg = load_config(args.config)
+    if args.theta is not None:
+        cfg.setdefault("dragin", {})["theta"] = args.theta
     dcfg = dragin_config_from_cfg(cfg)
 
     examples = [
