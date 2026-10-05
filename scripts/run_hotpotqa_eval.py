@@ -152,9 +152,8 @@ def load_config_and_run(
     # Run on HotpotQA data
     results = []
     for ex in tqdm(hotpotqa_data, desc="Running DRAGIN-RLM"):
-        result = run_example(ex, dcfg, model)
-        result["seed"] = 0
-        result["config"] = cfg["name"]
+        # run_example expects (example, cfg_dict, seed, model, tokenizer, checkpoint_path)
+        result = run_example(ex, cfg, seed=0, model=model, tokenizer=None)
         results.append(result)
 
         # Append to file immediately (checkpoint)
