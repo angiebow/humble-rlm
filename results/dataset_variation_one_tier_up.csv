@@ -1,0 +1,6 @@
+config,qid,gold_answer,answer,answer_source,f1,semantic_sim,latency_s,completion_tokens,n_retrievals,root_iterations,max_rind_score
+dragin_rlm_multidata_2b_4b,multidata-babilong-qa1-4k-0,bathroom,Mary journeyed to the bathroom.,worker_fallback,0.4,0.7461752891540527,86.13477350003086,41,20,20,0.0030128824431577272
+dragin_rlm_multidata_2b_4b,multidata-browsecomp-browsecomp-1226,Yumi Arai,Answer: Led Zeppelin,worker_fallback,0.0,0.44751685857772827,4425.640506916912,41,20,20,0.0012242281074749395
+dragin_rlm_multidata_2b_4b,multidata-hotpotqa-5a8b57f25542995d1e6f1371,yes,NOT FOUND,worker_fallback,0.0,0.49203890562057495,43.84227899997495,41,20,20,0.005842363640150672
+dragin_rlm_multidata_2b_4b,multidata-oolong-0,114,\boxed{11},worker_fallback,0.0,0.6313090324401855,1638.3536313329823,41,20,20,0.002248672944412944
+dragin_rlm_multidata_2b_4b,multidata-repoqa-psf_black,_merge_string_group,So the answer is:,raw_reasoning,0.0,0.5343157649040222,4648.205851790961,46,20,20,0.011229919330727034

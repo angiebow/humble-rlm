@@ -1,0 +1,16 @@
+# DRAGIN-RLM smoke test: 2B worker + 30B thinker (root)
+name: dragin_rlm_2b_30b_smoke
+mode: dragin
+models:
+  worker: openai/qwen2b-worker   # 2B worker via litellm proxy
+dragin:
+  model_path: "mlx-community/Qwen3-30B-A3B-4bit"  # 30B thinker (root), loaded directly
+  theta: 0.001
+  top_n: 25
+  generate_length: 768
+  max_retrieval_seconds: 600
+  max_triggers: 20
+  retrieval_top_k: 3
+  passage_chars: 1000
+  temperature: 0.0
+  disable_thinking_from_round: 2

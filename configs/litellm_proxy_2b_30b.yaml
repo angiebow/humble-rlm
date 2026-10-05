@@ -1,0 +1,20 @@
+# litellm proxy config: 2B worker + 30B root (thinker)
+model_list:
+  - model_name: qwen30b-root
+    litellm_params:
+      model: openai/mlx-community/Qwen3-30B-A3B-4bit
+      api_base: http://localhost:8011/v1
+      api_key: "not-needed"
+  - model_name: qwen2b-worker
+    litellm_params:
+      model: openai/mlx-community/Qwen3.5-2B-4bit
+      api_base: http://localhost:8002/v1
+      api_key: "not-needed"
+
+general_settings:
+  port: 4000
+
+router_settings:
+  disable_cooldowns: true
+  allowed_fails: 999999
+  cooldown_time: 0

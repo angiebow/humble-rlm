@@ -1,0 +1,25 @@
+config,qid,gold_answer,answer,answer_source,f1,semantic_sim,latency_s,completion_tokens,n_retrievals,root_iterations,max_rind_score
+dragin_rlm,browsecomp-1034,Nicholas Munene Mutuma,"<think>
+Thinking Process:
+
+1.  **Analyze the Request:**
+    *   Goal:",raw_reasoning,0.0,0.4462185502052307,2833.052520250203,62,20,20,0.0014831139148321903
+dragin_rlm,browsecomp-284,Come into my arms,"<think>
+Thinking Process:
+
+1.  **Analyze the Request:**
+    *   Goal: Find the title of a song released as a single by",raw_reasoning,0.0,0.5886198282241821,2821.270053165965,73,20,20,0.0034216428078587824
+dragin_rlm,browsecomp-401,Evangeline Walton,<short answer>'.,cue,0.0,0.5063979029655457,408.310035541188,190,1,2,0.0012603227208363155
+dragin_rlm,browsecomp-46,Rowan Simpson,<short answer>'.,cue,0.0,0.44264599680900574,333.99125170800835,213,1,2,0.0018720288578693428
+dragin_rlm,browsecomp-529,Njelic & De Mthuda,NOT FOUND,worker_fallback,0.0,0.5124087929725647,3884.7008517500944,41,20,20,0.0011329369590785399
+dragin_rlm,browsecomp-771,Vakkorama,"<think>
+Thinking Process:
+
+1.  **Analyze the Request:**
+    *   Input: A list of 50",raw_reasoning,0.0,0.4420609474182129,3489.88992754207,68,20,20,0.0020539914408452264
+dragin_rlm,browsecomp-778,21,NOT FOUND,worker_fallback,0.0,0.5699491500854492,2985.975502208108,41,20,20,0.0011165238196522709
+dragin_rlm,browsecomp-904,1980,"<think>
+Thinking Process:
+
+1.  **Analyze the Request:**
+    *   Source Material: A collection of 50 documents (",raw_reasoning,0.0,0.47075143456459045,3882.3651614580303,71,20,20,0.005049696680547555

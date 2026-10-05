@@ -12,6 +12,7 @@ tier's config/ports/output:
 
     .venv/bin/python scripts/run_multidata_suitability.py --tier 08b_2b   # default
     .venv/bin/python scripts/run_multidata_suitability.py --tier 2b_4b
+    .venv/bin/python scripts/run_multidata_suitability.py --tier 2b_35b
 
 Each tier starts its own worker mlx_lm.server + litellm proxy on its own
 ports (never reusing another tier's), so multiple tiers can run back to
@@ -37,6 +38,7 @@ VENV_BIN = ROOT / ".venv/bin"
 TIERS = {
     "08b_2b": ("mlx-community/Qwen3.5-2B-4bit", "mlx-community/Qwen3.5-0.8B-4bit", 8002, 4001),
     "2b_4b": ("mlx-community/Qwen3.5-4B-4bit", "mlx-community/Qwen3.5-2B-4bit", 8003, 4002),
+    "2b_35b": ("mlx-community/Qwen3.5-35B-A3B-4bit", "mlx-community/Qwen3.5-2B-4bit", 8004, 4003),
 }
 
 

@@ -1,0 +1,22 @@
+# DRAGIN-RLM multi-dataset suitability probe, 2b_35b tier (maximum capacity:
+# worker 2B, root/thinker 35B-A3B). Same 5-question probe set
+# (data/processed/multidata_probe.jsonl), same theta and caps, so this tier is
+# directly comparable to 08b_2b and 2b_4b -- model capacity is the only thing
+# that changes. Self-contained (own litellm proxy on :4003, own worker server
+# on :8004) so it can run without disturbing the other tiers or the main
+# theta-sweep setup (:4000).
+name: dragin_rlm_multidata_2b_35b
+mode: dragin
+models:
+  worker: openai/qwen35-worker-multidata-2b35b
+dragin:
+  model_path: "mlx-community/Qwen3.5-35B-A3B-4bit"  # root; loaded directly, no litellm alias.
+                                                     # 35B-A3B MoE; needs sufficient VRAM.
+  theta: 0.001            # same calibrated value as every other tier/sweep
+  top_n: 25
+  generate_length: 768
+  max_retrieval_seconds: 600
+  max_triggers: 20
+  retrieval_top_k: 3
+  passage_chars: 1000
+  temperature: 0.0
