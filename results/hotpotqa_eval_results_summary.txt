@@ -1,0 +1,18 @@
+
+====== RLM-DRAGIN HotpotQA Evaluation Summary ======
+
+ACCURACY Metrics:
+  - Accuracy:           0.000
+  - Recall (retrieval): nan
+  - Precision (retrieval): nan
+  - F1 Score:           0.000
+  - ECE (calibration):  0.000
+
+EFFICIENCY Metrics:
+  - Token Footprint (mean): 0 tokens
+  - Token Footprint (p95):  0 tokens
+  - Recursion Depth (mean): 0.00 iterations
+  - Recursion Depth (max):  0 iterations
+
+Questions evaluated: 10
+Config: dragin_rlm
