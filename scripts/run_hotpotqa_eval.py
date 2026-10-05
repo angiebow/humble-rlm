@@ -13,7 +13,7 @@ EFFICIENCY:
   - Token Footprint: total tokens used per question
   - Recursion Depth: max depth of reasoning steps (retrieval iterations)
 
-    python scripts/run_hotpotqa_eval.py --config configs/experiments/dragin_rlm.yaml \\
+    python scripts/run_hotpotqa_eval.py --config configs/experiments/dragin_rlm_hotpotqa.yaml \\
         --out results/hotpotqa_eval_results.jsonl
 
 Output files:
@@ -26,7 +26,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import subprocess
 import sys
+import time
+import urllib.request
 from pathlib import Path
 from collections import defaultdict
 
@@ -63,22 +67,20 @@ def load_hotpotqa_questions(limit: int = 10) -> list[dict]:
             "query": ex["question"],
             "context": context,
             "gold_answer": ex["answer"],
-            "supporting_facts": ex.get("supporting_facts"),  # for recall/precision
+            "supporting_facts": ex.get("supporting_facts"),
         })
 
     return examples
 
 
 def compute_ece(confidences: list[float], correctness: list[bool], n_bins: int = 10) -> float:
-    """Compute Expected Calibration Error: mean absolute difference between
-    confidence and accuracy in each bin."""
+    """Compute Expected Calibration Error."""
     if not confidences:
         return np.nan
 
     confidences = np.array(confidences)
     correctness = np.array(correctness)
 
-    # Bin by confidence
     bins = np.linspace(0, 1, n_bins + 1)
     ece = 0.0
 
@@ -96,17 +98,15 @@ def compute_retrieval_recall_precision(
     checkpoints: list[dict],
     supporting_facts: list[tuple[str, int]] | None
 ) -> tuple[float, float]:
-    """Compute recall and precision of retrieved passages against supporting facts."""
+    """Compute recall and precision of retrieved passages."""
     if not supporting_facts or not checkpoints:
         return np.nan, np.nan
 
-    # supporting_facts is list of (title, sentence_idx)
     relevant_passages = set(supporting_facts)
     retrieved_passages = set()
 
     for cp in checkpoints:
         if cp.get("document"):
-            # Extract title and try to match
             doc = cp["document"]
             for title, _ in supporting_facts:
                 if title.lower() in doc.lower():
@@ -127,6 +127,55 @@ def compute_recursion_depth(checkpoints: list[dict]) -> int:
     return len(checkpoints) if checkpoints else 0
 
 
+def _reachable(url: str) -> bool:
+    try:
+        urllib.request.urlopen(url, timeout=2)
+        return True
+    except Exception:
+        return False
+
+
+def ensure_local_servers(worker_model: str, worker_port: int, litellm_port: int, litellm_config: Path) -> None:
+    """Start local mlx_lm.server and litellm proxy if not already running."""
+    logs = ROOT / "logs"
+    logs.mkdir(exist_ok=True)
+
+    if not _reachable(f"http://localhost:{worker_port}/v1/models"):
+        print(f"Starting worker mlx_lm.server ({worker_model}) on :{worker_port} ...", flush=True)
+        subprocess.Popen(
+            [
+                str(ROOT / ".venv/bin/mlx_lm.server"),
+                "--model", worker_model,
+                "--port", str(worker_port),
+                "--chat-template-args", '{"enable_thinking": false}',
+            ],
+            stdout=open(logs / f"mlx_worker_{worker_port}.log", "a"),
+            stderr=subprocess.STDOUT,
+            start_new_session=True,
+        )
+        for _ in range(60):
+            if _reachable(f"http://localhost:{worker_port}/v1/models"):
+                break
+            time.sleep(2)
+        else:
+            sys.exit(f"worker mlx_lm.server never came up on :{worker_port}")
+
+    if not _reachable(f"http://localhost:{litellm_port}/v1/models"):
+        print(f"Starting litellm proxy on :{litellm_port} ...", flush=True)
+        subprocess.Popen(
+            [str(ROOT / ".venv/bin/litellm"), "--config", str(litellm_config), "--port", str(litellm_port)],
+            stdout=open(logs / f"litellm_proxy_{litellm_port}.log", "a"),
+            stderr=subprocess.STDOUT,
+            start_new_session=True,
+        )
+        for _ in range(60):
+            if _reachable(f"http://localhost:{litellm_port}/v1/models"):
+                break
+            time.sleep(2)
+        else:
+            sys.exit(f"litellm proxy never came up on :{litellm_port}")
+
+
 def load_config_and_run(
     config_path: str,
     hotpotqa_data: list[dict],
@@ -142,6 +191,18 @@ def load_config_and_run(
     cfg = load_config(config_path)
     dcfg = dragin_config_from_cfg(cfg)
 
+    # Start local servers for worker and litellm proxy
+    worker_model = "mlx-community/Qwen3.5-2B-4bit"
+    worker_port = 8005
+    litellm_port = 4005
+    litellm_config = ROOT / "configs/litellm_proxy_hotpotqa.yaml"
+
+    ensure_local_servers(worker_model, worker_port, litellm_port, litellm_config)
+
+    # Set API endpoint to local litellm proxy
+    os.environ["OPENAI_API_BASE"] = f"http://localhost:{litellm_port}/v1"
+    os.environ.setdefault("OPENAI_API_KEY", "not-needed")
+
     # Load model once
     print(f"Loading model: {dcfg.model_path}")
     model = load_dragin_model(dcfg.model_path)
@@ -152,7 +213,6 @@ def load_config_and_run(
     # Run on HotpotQA data
     results = []
     for ex in tqdm(hotpotqa_data, desc="Running DRAGIN-RLM"):
-        # run_example expects (example, cfg_dict, seed, model, tokenizer, checkpoint_path)
         result = run_example(ex, cfg, seed=0, model=model, tokenizer=None)
         results.append(result)
 
@@ -185,7 +245,7 @@ def evaluate_results(run_file: Path, output_csv: Path, summary_txt: Path) -> Non
         for cp in df.get("checkpoints", pd.Series([[]] * len(df)))
     ]
 
-    # Compute retrieval metrics (recall/precision)
+    # Compute retrieval metrics
     retrieval_metrics = []
     for _, row in df.iterrows():
         checkpoints = row.get("checkpoints") or []
@@ -199,7 +259,7 @@ def evaluate_results(run_file: Path, output_csv: Path, summary_txt: Path) -> Non
     df["retrieval_recall"] = [r for r, _ in retrieval_metrics]
     df["retrieval_precision"] = [p for _, p in retrieval_metrics]
 
-    # Compute confidence-based ECE (using F1 as confidence proxy)
+    # Compute ECE
     confidences = df["f1"].fillna(0.5).tolist()
     correctness = df["correct"].tolist()
     ece = compute_ece(confidences, correctness)

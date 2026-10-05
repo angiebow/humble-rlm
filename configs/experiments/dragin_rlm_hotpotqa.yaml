@@ -1,0 +1,18 @@
+# DRAGIN-RLM for HotpotQA evaluation: local setup with no external dependencies.
+# Uses local mlx_lm servers for both root and worker.
+name: dragin_rlm_hotpotqa
+mode: dragin
+models:
+  # Worker uses local mlx_lm.server on :8005 (separate from other tiers)
+  worker: openai/qwen35-worker-hotpotqa
+dragin:
+  # Root model: loaded directly, no external API
+  model_path: "mlx-community/Qwen3.5-35B-A3B-4bit"
+  theta: 0.001
+  top_n: 25
+  generate_length: 768
+  max_retrieval_seconds: 600
+  max_triggers: 20
+  retrieval_top_k: 3
+  passage_chars: 1000
+  temperature: 0.0
