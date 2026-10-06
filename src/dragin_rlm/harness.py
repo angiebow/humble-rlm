@@ -127,11 +127,14 @@ def _render_prompt(template: str, tokenizer: Any, disable_thinking: bool, prefix
 
 
 def _call_worker(worker_model: str, query: str, passages: str) -> str:
-    import litellm
+    import json
+    import urllib.request
 
-    resp = litellm.completion(
-        model=worker_model,
-        messages=[
+    # Call the local mlx_lm.server directly at localhost:8005 instead of through litellm
+    url = "http://localhost:8005/v1/chat/completions"
+    payload = {
+        "model": "mlx-community/Qwen3.5-2B-4bit",
+        "messages": [
             {
                 "role": "user",
                 "content": WORKER_PROMPT.format(
@@ -139,10 +142,22 @@ def _call_worker(worker_model: str, query: str, passages: str) -> str:
                 ),
             }
         ],
-        max_tokens=128,
-        temperature=0,
+        "max_tokens": 128,
+        "temperature": 0,
+    }
+
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode('utf-8'),
+        headers={"Content-Type": "application/json"},
     )
-    return (resp.choices[0].message.content or "").strip()
+
+    try:
+        with urllib.request.urlopen(req, timeout=30) as response:
+            result = json.loads(response.read().decode('utf-8'))
+            return (result.get("choices", [{}])[0].get("message", {}).get("content", "")).strip()
+    except Exception as e:
+        return f"ERROR: {str(e)}"
 
 
 def _extract_answer(text: str, worker_fallback: str = "") -> Tuple[str, str]:
