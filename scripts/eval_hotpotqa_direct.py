@@ -85,6 +85,7 @@ def main():
     out_dir = ROOT / "results"
     out_dir.mkdir(exist_ok=True)
     out_file = out_dir / "hotpotqa_eval_results.jsonl"
+    csv_file = out_dir / "table_hotpotqa_eval.csv"
 
     print("Loading HotpotQA questions...")
     questions = load_hotpotqa(limit=10)
@@ -140,6 +141,12 @@ def main():
     accuracy = df["correct"].mean()
     f1_score = df["f1"].mean()
     avg_tokens = df["total_tokens"].mean()
+
+    # Write per-question CSV
+    csv_cols = ["qid", "gold_answer", "answer", "correct", "f1", "total_tokens", "root_tokens", "worker_tokens"]
+    csv_df = df[csv_cols].sort_values("qid")
+    csv_df.to_csv(csv_file, index=False)
+    print(f"Per-question metrics -> {csv_file}")
 
     summary = f"""
 ====== HotpotQA Direct Evaluation (Local Qwen Models) ======
