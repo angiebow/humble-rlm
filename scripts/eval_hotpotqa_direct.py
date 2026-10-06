@@ -5,11 +5,12 @@ Loads HotpotQA questions and evaluates using:
 - Worker model (2B) for retrieving answers from passages
 - Direct HTTP calls to mlx_lm.server on localhost:8005
 
-Metrics: accuracy, F1, token usage, retrieval recall/precision
+Metrics: accuracy, F1, token usage, semantic similarity, latency, iterations
 """
 
 import json
 import sys
+import time
 import urllib.request
 from pathlib import Path
 
@@ -19,7 +20,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from eval.metrics import f1, is_correct
+from eval.metrics import f1, is_correct, semantic_similarity
 from gate_rlm.data import write_jsonl, read_jsonl
 
 
@@ -97,19 +98,26 @@ def main():
     for i, q in enumerate(questions):
         print(f"  [{i+1}/{len(questions)}] {q['qid']}: {q['query'][:60]}...")
 
+        t_start = time.perf_counter()
+
         # Call root model for initial answer
         root_result = call_model(q["query"], q["context"], role="root")
         root_answer = root_result.get("answer", "")
         root_tokens = root_result.get("tokens", 0)
 
-        # If root couldn't answer, try worker on context
+        # If root couldn't answer, try worker on context (1 iteration)
+        iterations = 0
         if not root_answer or "not found" in root_answer.lower():
             worker_result = call_model(q["query"], q["context"][:2000], role="worker")
             final_answer = worker_result.get("answer", "")
             worker_tokens = worker_result.get("tokens", 0)
+            iterations = 1
         else:
             final_answer = root_answer
             worker_tokens = 0
+            iterations = 0
+
+        latency_s = time.perf_counter() - t_start
 
         result = {
             "qid": q["qid"],
@@ -120,6 +128,8 @@ def main():
             "total_tokens": root_tokens + worker_tokens,
             "root_tokens": root_tokens,
             "worker_tokens": worker_tokens,
+            "latency_s": latency_s,
+            "iterations": iterations,
         }
         results.append(result)
 
@@ -137,13 +147,22 @@ def main():
         for a, g in zip(df.answer, df.gold_answer)
     ]
     df["f1"] = [f1(a or "", g) for a, g in zip(df.answer, df.gold_answer)]
+    df["semantic_similarity"] = [
+        semantic_similarity(a or "", g) for a, g in zip(df.answer, df.gold_answer)
+    ]
 
     accuracy = df["correct"].mean()
     f1_score = df["f1"].mean()
+    semantic_sim = df["semantic_similarity"].mean()
     avg_tokens = df["total_tokens"].mean()
+    avg_latency = df["latency_s"].mean()
+    total_iterations = df["iterations"].sum()
 
     # Write per-question CSV
-    csv_cols = ["qid", "gold_answer", "answer", "correct", "f1", "total_tokens", "root_tokens", "worker_tokens"]
+    csv_cols = [
+        "qid", "gold_answer", "answer", "correct", "f1", "semantic_similarity",
+        "total_tokens", "root_tokens", "worker_tokens", "latency_s", "iterations"
+    ]
     csv_df = df[csv_cols].sort_values("qid")
     csv_df.to_csv(csv_file, index=False)
     print(f"Per-question metrics -> {csv_file}")
@@ -152,18 +171,28 @@ def main():
 ====== HotpotQA Direct Evaluation (Local Qwen Models) ======
 
 ACCURACY Metrics:
-  - Accuracy:     {accuracy:.3f}
-  - F1 Score:     {f1_score:.3f}
+  - Accuracy:              {accuracy:.3f}
+  - F1 Score:              {f1_score:.3f}
+  - Semantic Similarity:   {semantic_sim:.3f}
 
 EFFICIENCY Metrics:
-  - Avg Tokens (root + worker): {avg_tokens:.0f}
-  - Total Tokens Used: {df['total_tokens'].sum():.0f}
+  - Avg Tokens:            {avg_tokens:.0f} tokens per question
+  - Total Tokens Used:     {df['total_tokens'].sum():.0f} tokens
+  - Avg Latency:           {avg_latency:.2f}s per question
+
+COMPLEXITY Metrics:
+  - Total Iterations:      {int(total_iterations)} (worker calls)
+  - Avg Iterations:        {df['iterations'].mean():.2f} per question
+  - Max Iterations:        {int(df['iterations'].max())}
 
 Questions evaluated: {len(df)}
 
 Root model: mlx-community/Qwen3.5-35B-A3B-4bit
 Worker model: mlx-community/Qwen3.5-2B-4bit
 Endpoint: http://localhost:8005/v1/chat/completions
+
+Note: RIND score is specific to DRAGIN-RLM integration (requires attention probing);
+      not available in direct HTTP evaluation mode.
 """
 
     summary_file = out_dir / "hotpotqa_eval_summary.txt"
