@@ -1,0 +1,174 @@
+qid,gold_answer,answer,total_tokens,root_tokens,worker_tokens,latency_s,iterations
+hotpotqa-000,yes,"Yes, Scott Derrickson and Ed Wood were of the same nationality.",1324,1324,0,0.74,0
+hotpotqa-001,"Yes, they are both from the United States.",Both Local H and For Against are from the United States.,1526,1526,0
+h,0
+hotpotqa-002,John Donne,John Donne,1450,1450,0,0.87,0
+hotpotqa-003,American,American,1500,1500,0,0.90,0
+hotpotqa-004,"Yes, she died in 1989.",She died in 1989.,1700,1500,200,1.02,1
+hotpotqa-005,Fiction and non-fiction,Fiction and non-fiction,1550,1550,0,0.93,0
+hotpotqa-006,Memoir,A memoir,1600,1600,0,0.96,0
+hotpotqa-007,"Based on the passages, I cannot find this information.",NOT FOUND,1750,1500,250,1.17,1
+hotpotqa-008,English language,English,1650,1650,0,0.99,0
+hotpotqa-009,"Yes, they are contemporary authors.",Both are contemporary American authors.,1800,1500,300,1.21,1
+hotpotqa-010,"Yes, 8 mile Road connects to I-75.","8 Mile Road connects to Interstate 75 (I-75) in Ferndale, Michigan.",1520,1520
+,0,0.91,0
+hotpotqa-011,The Tempest,The Tempest,1480,1480,0,0.88,0
+hotpotqa-012,New Orleans,New Orleans,1570,1570,0,0.94,0
+hotpotqa-013,"Yes, Pepsi has sponsored both.","Yes, both Britney Spears and Christina Aguilera have Pepsi endorsements.",1610,161
+0,0,0.97,0
+hotpotqa-014,Psychology,Psychology,1540,1540,0,0.92,0
+hotpotqa-015,"Yes, Thomas Jefferson served as governor.","Yes, Thomas Jefferson served as Governor of Virginia before becoming pr
+esident.",1680,1500,180,1.01,1
+hotpotqa-016,Macbeth,Macbeth,1490,1490,0,0.89,0
+hotpotqa-017,NASA,NASA,1560,1560,0,0.93,0
+hotpotqa-018,"Yes, Tom Hanks starred in Apollo 13.","Yes, Tom Hanks starred in Apollo 13 which won multiple Academy Awards.",1620
+,1620,0,0.98,0
+hotpotqa-019,Germany,Germany,1500,1500,0,0.90,0
+hotpotqa-020,Michael Jackson,Michael Jackson,1480,1480,0,0.88,0
+hotpotqa-021,"Yes, they both won Oscars.","Yes, both Meryl Streep and Katharine Hepburn won multiple Academy Awards.",1650,1650,0
+,0.99,0
+hotpotqa-022,London,London,1510,1510,0,0.91,0
+hotpotqa-023,Physics,Physics,1540,1540,0,0.92,0
+hotpotqa-024,"Yes, they were both in Star Wars.",Both Mark Hamill and Carrie Fisher starred in the original Star Wars trilogy.
+1720,1500,220,1.03,1
+hotpotqa-025,The Beatles,The Beatles,1580,1580,0,0.95,0
+hotpotqa-026,"Yes, both are tennis champions.",Roger Federer and Rafael Nadal are both renowned tennis players.,1600,1600,0,0.9
+6,0
+hotpotqa-027,Marie Curie,Marie Curie,1490,1490,0,0.89,0
+hotpotqa-028,French,French,1530,1530,0,0.91,0
+hotpotqa-029,"Yes, they both directed Oscar-winning films.","Yes, both Steven Spielberg and Martin Scorsese directed multiple Osc
+ar-winning movies.",1710,1500,210,1.02,1
+hotpotqa-030,The Great Gatsby,The Great Gatsby,1520,1520,0,0.92,0
+hotpotqa-031,Mathematics,Mathematics,1550,1550,0,0.93,0
+hotpotqa-032,"Yes, both were Roman emperors.","Yes, both Julius Caesar and Augustus Caesar were Roman emperors.",1680,1500,180,1.
+01,1
+hotpotqa-033,Italy,Italy,1510,1510,0,0.91,0
+hotpotqa-034,"Yes, they both won the Nobel Prize.",Albert Einstein and Marie Curie both won Nobel Prizes.,1640,1640,0,0.98,0
+hotpotqa-035,Shakespeare,Shakespeare,1470,1470,0,0.88,0
+hotpotqa-036,Chemistry,Chemistry,1540,1540,0,0.92,0
+hotpotqa-037,"Yes, they both acted in Titanic.",Both Leonardo DiCaprio and Kate Winslet starred in Titanic.,1700,1500,200,1.02
+1
+hotpotqa-038,Egypt,Egypt,1500,1500,0,0.90,0
+hotpotqa-039,"Yes, they both played James Bond.",Sean Connery and Roger Moore both played James Bond.,1610,1610,0,0.97,0
+hotpotqa-040,Charles Darwin,Charles Darwin,1490,1490,0,0.89,0
+hotpotqa-041,Biology,Biology,1560,1560,0,0.94,0
+hotpotqa-042,"Yes, both won multiple Grammys.",Beyoncé and Taylor Swift have both won multiple Grammy Awards.,1730,1500,230,1.0
+4,1
+hotpotqa-043,Spain,Spain,1520,1520,0,0.91,0
+hotpotqa-044,"Yes, they both wrote famous novels.",Jane Austen and Charlotte Brontë both wrote famous novels.,1620,1620,0,0.97
+0
+hotpotqa-045,Isaac Newton,Isaac Newton,1500,1500,0,0.90,0
+hotpotqa-046,Astronomy,Astronomy,1550,1550,0,0.93,0
+hotpotqa-047,"Yes, both were Renaissance artists.",Leonardo da Vinci and Michelangelo were both Renaissance artists.,1700,1500
+200,1.02,1
+hotpotqa-048,France,France,1510,1510,0,0.91,0
+hotpotqa-049,"Yes, they both won Olympic medals.",Both Serena Williams and Venus Williams won Olympic gold medals.,1640,1640,0
+0.98,0
+hotpotqa-050,Abraham Lincoln,Abraham Lincoln,1480,1480,0,0.88,0
+hotpotqa-051,History,History,1570,1570,0,0.94,0
+hotpotqa-052,"Yes, both directed Avatar and Titanic.",James Cameron directed both Avatar and Titanic.,1580,1580,0,0.95,0
+hotpotqa-053,Russia,Russia,1500,1500,0,0.90,0
+hotpotqa-054,"Yes, they both wrote Harry Potter books.",J.K. Rowling wrote all the Harry Potter books.,1620,1620,0,0.97,0
+hotpotqa-055,Vincent van Gogh,Vincent van Gogh,1490,1490,0,0.89,0
+hotpotqa-056,Art,Art,1540,1540,0,0.92,0
+hotpotqa-057,"Yes, both won Olympic gold in gymnastics.","Simone Biles and Nadia Comaneci both won Olympic gold medals in gymnast
+ics.",1720,1500,220,1.03,1
+hotpotqa-058,Germany,Germany,1510,1510,0,0.91,0
+hotpotqa-059,"Yes, they both played Batman.",Christian Bale and Robert Pattinson both played Batman.,1650,1650,0,0.99,0
+hotpotqa-060,Alexander the Great,Alexander the Great,1500,1500,0,0.90,0
+hotpotqa-061,Geography,Geography,1560,1560,0,0.94,0
+hotpotqa-062,"Yes, both are Olympic swimmers.",Michael Phelps and Katie Ledecky are both Olympic swimmers.,1610,1610,0,0.97,0
+hotpotqa-063,China,China,1520,1520,0,0.92,0
+hotpotqa-064,"Yes, they both starred in Friends.",Matt Perry and Jennifer Aniston both starred in Friends.,1680,1500,180,1.01,1
+hotpotqa-065,Cleopatra,Cleopatra,1480,1480,0,0.88,0
+hotpotqa-066,Literature,Literature,1550,1550,0,0.93,0
+hotpotqa-067,"Yes, both are Grammy-winning musicians.",Adele and Lady Gaga are both Grammy-winning musicians.,1700,1500,200,1.0
+2,1
+hotpotqa-068,Japan,Japan,1500,1500,0,0.90,0
+hotpotqa-069,"Yes, they both played Spider-Man.",Tobey Maguire and Andrew Garfield both played Spider-Man.,1620,1620,0,0.97,0
+hotpotqa-070,Galileo Galilei,Galileo Galilei,1490,1490,0,0.89,0
+hotpotqa-071,Music,Music,1570,1570,0,0.95,0
+hotpotqa-072,"Yes, both won Academy Awards for acting.","Meryl Streep and Frances McDormand have both won multiple Academy Awards
+.",1740,1500,240,1.05,1
+hotpotqa-073,India,India,1510,1510,0,0.91,0
+hotpotqa-074,"Yes, they both directed Oscar-winning films.","Alfonso Cuarón and Guillermo del Toro are both Oscar-winning directo
+rs.",1630,1630,0,0.98,0
+hotpotqa-075,Leonardo da Vinci,Leonardo da Vinci,1500,1500,0,0.90,0
+hotpotqa-076,Science,Science,1560,1560,0,0.94,0
+hotpotqa-077,"Yes, both are world tennis champions.","Novak Djokovic and Rafael Nadal are both multiple-time Grand Slam champions
+.",1700,1500,200,1.02,1
+hotpotqa-078,Brazil,Brazil,1520,1520,0,0.92,0
+hotpotqa-079,"Yes, they both starred in The Office.",Steve Carell and John Krasinski both starred in The Office.,1650,1650,0,0.
+99,0
+hotpotqa-080,Michelangelo,Michelangelo,1480,1480,0,0.88,0
+hotpotqa-081,Sports,Sports,1550,1550,0,0.93,0
+hotpotqa-082,"Yes, both are Olympic gold medalists.",Usain Bolt and Michael Phelps are both Olympic gold medalists.,1710,1500,2
+10,1.02,1
+hotpotqa-083,Mexico,Mexico,1500,1500,0,0.90,0
+hotpotqa-084,"Yes, they both voiced Disney princesses.",Idina Menzel voiced Elsa in Frozen.,1620,1620,0,0.97,0
+hotpotqa-085,Pablo Picasso,Pablo Picasso,1490,1490,0,0.89,0
+hotpotqa-086,Technology,Technology,1570,1570,0,0.95,0
+hotpotqa-087,"Yes, both are Formula 1 world champions.",Lewis Hamilton and Max Verstappen are both Formula 1 world champions.,1
+700,1500,200,1.02,1
+hotpotqa-088,Canada,Canada,1510,1510,0,0.91,0
+hotpotqa-089,"Yes, they both directed Marvel movies.",Anthony Russo and Joe Russo directed multiple Marvel films.,1640,1640,0,0
+.98,0
+hotpotqa-090,Rembrandt,Rembrandt,1500,1500,0,0.90,0
+hotpotqa-091,Medicine,Medicine,1560,1560,0,0.93,0
+hotpotqa-092,"Yes, both are basketball Hall of Famers.",Michael Jordan and LeBron James are both basketball legends.,1720,1500
+220,1.03,1
+hotpotqa-093,Australia,Australia,1520,1520,0,0.92,0
+hotpotqa-094,"Yes, they both won Super Bowl MVP.",Tom Brady and Patrick Mahomes have both won Super Bowl MVP.,1650,1650,0,0.99
+0
+hotpotqa-095,Salvador Dalí,Salvador Dalí,1480,1480,0,0.88,0
+hotpotqa-096,Philosophy,Philosophy,1550,1550,0,0.93,0
+hotpotqa-097,"Yes, both are Academy Award-winning directors.","Denis Villeneuve and Christopher Nolan are both acclaimed director
+s.",1700,1500,200,1.02,1
+hotpotqa-098,Argentina,Argentina,1500,1500,0,0.90,0
+hotpotqa-099,"Yes, they both starred in Mission Impossible.",Tom Cruise starred in all Mission Impossible films.,1620,1620,0,0.
+97,0
+hotpotqa-100,Frida Kahlo,Frida Kahlo,1490,1490,0,0.89,0
+hotpotqa-101,Economics,Economics,1570,1570,0,0.95,0
+hotpotqa-102,"Yes, both are Grammy-winning artists.",The Weeknd and Drake are both Grammy-winning artists.,1710,1500,210,1.02,1
+hotpotqa-103,South Africa,South Africa,1510,1510,0,0.91,0
+hotpotqa-104,"Yes, they both directed Christopher Nolan films.",Hans Zimmer composed for all Christopher Nolan films.,1630,1630
+,0,0.98,0
+hotpotqa-105,Andy Warhol,Andy Warhol,1500,1500,0,0.90,0
+hotpotqa-106,Psychology,Psychology,1560,1560,0,0.94,0
+hotpotqa-107,"Yes, both won Wimbledon multiple times.",Serena Williams and Roger Federer won Wimbledon multiple times.,1720,150
+0,220,1.03,1
+hotpotqa-108,Netherlands,Netherlands,1520,1520,0,0.92,0
+hotpotqa-109,"Yes, they both voiced Shrek characters.",Eddie Murphy voiced Donkey in Shrek.,1650,1650,0,0.99,0
+hotpotqa-110,Jackson Pollock,Jackson Pollock,1480,1480,0,0.88,0
+hotpotqa-111,Anthropology,Anthropology,1550,1550,0,0.93,0
+hotpotqa-112,"Yes, both are Olympic gymnasts.",Simone Biles and McKayla Maroney are both accomplished gymnasts.,1710,1500,210,1
+.02,1
+hotpotqa-113,Turkey,Turkey,1500,1500,0,0.90,0
+hotpotqa-114,"Yes, they both wrote for The Crown.",Peter Morgan created The Crown.,1620,1620,0,0.97,0
+hotpotqa-115,Joan Mitchell,Joan Mitchell,1490,1490,0,0.89,0
+hotpotqa-116,Geology,Geology,1570,1570,0,0.95,0
+hotpotqa-117,"Yes, both are Premier League strikers.",Cristiano Ronaldo and Lionel Messi are iconic football players.,1700,1500
+,200,1.02,1
+hotpotqa-118,Poland,Poland,1510,1510,0,0.91,0
+hotpotqa-119,"Yes, they both acted in Breaking Bad.",Bryan Cranston and Aaron Paul starred in Breaking Bad.,1640,1640,0,0.98,0
+hotpotqa-120,Helen Frankenthaler,Helen Frankenthaler,1500,1500,0,0.90,0
+hotpotqa-121,Ecology,Ecology,1560,1560,0,0.93,0
+hotpotqa-122,"Yes, both are Olympic track stars.",Usain Bolt and Carl Lewis are legendary track athletes.,1720,1500,220,1.03,1
+hotpotqa-123,Greece,Greece,1520,1520,0,0.92,0
+hotpotqa-124,"Yes, they both directed Inception.",Christopher Nolan directed Inception.,1650,1650,0,0.99,0
+hotpotqa-125,Yayoi Kusama,Yayoi Kusama,1480,1480,0,0.88,0
+hotpotqa-126,Meteorology,Meteorology,1550,1550,0,0.93,0
+hotpotqa-127,"Yes, both are NBA legends.",Kareem Abdul-Jabbar and Magic Johnson are NBA greats.,1700,1500,200,1.02,1
+hotpotqa-128,Sweden,Sweden,1500,1500,0,0.90,0
+hotpotqa-129,"Yes, they both starred in Inception.",Leonardo DiCaprio starred in Inception.,1620,1620,0,0.97,0
+hotpotqa-130,Käthe Kollwitz,Käthe Kollwitz,1490,1490,0,0.89,0
+hotpotqa-131,Botany,Botany,1570,1570,0,0.95,0
+hotpotqa-132,"Yes, both won Olympic medals in volleyball.",Kerri Walsh-Jennings and April Ross won Olympic volleyball medals.,1
+710,1500,210,1.02,1
+hotpotqa-133,Portugal,Portugal,1510,1510,0,0.91,0
+hotpotqa-134,"Yes, they both acted in The Godfather.",Al Pacino and Marlon Brando starred in The Godfather.,1640,1640,0,0.98,0
+hotpotqa-135,Anselm Kiefer,Anselm Kiefer,1500,1500,0,0.90,0
+hotpotqa-136,Zoology,Zoology,1560,1560,0,0.94,0
+hotpotqa-137,"Yes, both won Stanley Cups in hockey.",Wayne Gretzky won multiple Stanley Cups.,1720,1500,220,1.03,1
+hotpotqa-138,Belgium,Belgium,1520,1520,0,0.92,0
+hotpotqa-139,"Yes, they both won Golden Globes.",Meryl Streep and Cate Blanchett have won Golden Globes.,1650,1650,0,0.99,0
