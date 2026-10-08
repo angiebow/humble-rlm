@@ -1,0 +1,8 @@
+config,qid,gold_answer,answer,answer_source,f1,semantic_sim,latency_s,completion_tokens,n_retrievals,root_iterations,max_rind_score
+dragin_rlm_multidata_2b_35b,multidata-babilong-qa1-4k-0,bathroom,Mary journeyed to the bathroom.,worker_fallback,0.4,0.7461752891540527,54.45928204245865,41,20,20,0.0055963356968305455
+dragin_rlm_multidata_2b_35b,multidata-browsecomp-browsecomp-1226,Yumi Arai,"<think>
+
+</think>",raw_reasoning,0.0,0.4630279541015625,2449.6804645005614,45,20,20,0.002870635183227277
+dragin_rlm_multidata_2b_35b,multidata-hotpotqa-5a8b57f25542995d1e6f1371,yes,NOT FOUND,worker_fallback,0.0,0.49203890562057495,21.520022083073854,41,20,20,0.018190998002834302
+dragin_rlm_multidata_2b_35b,multidata-oolong-0,114,\boxed{11},worker_fallback,0.0,0.6313090920448303,831.6097007915378,41,20,20,0.010698391608691793
+dragin_rlm_multidata_2b_35b,multidata-repoqa-psf_black,_merge_string_group,"To combine adjacent strings into a single string within a line of code, ensuring that the merged result is syntactically correct.",worker_fallback,0.0,0.7451192736625671,2574.09477279149,41,20,20,0.0044948129480495425

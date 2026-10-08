@@ -1,0 +1,545 @@
+qid,gold_answer,answer,total_tokens,root_tokens,worker_tokens,latency_s,iterations
+hotpotqa-000,yes,"Yes, Scott Derrickson and Ed Wood were of the same nationality.
+
+Both men were **American**:
+*   **Ed Wood** was an American filmmaker (born October 10, 1924).
+*   **Scott Derrickson** is an American director, screenwriter, and producer (born July 16, 1966).",1324,1324,0,0.7381217926740646,0
+hotpotqa-001,Chief of Protocol,"Based on the text provided, the woman who portrayed Corliss Archer in the film *Kiss and Tell* (1945) was **Shirley Temple**.
+
+The text states that *Kiss and Tell* ""stars Shirley Temple in her final starring role as well as her final film appearance"" and that she was a ""child actress from 1935 to 1938.""
+
+Therefore, the government position held by her at the time of the film's release (1945) was **United States Ambassador to Ghana** and **United States Ambassador to Czechoslovakia** (",1524,1524,0,0.960513542406261,0
+hotpotqa-002,Animorphs,"Based on the text provided, the series that fits all the criteria is **The Hork-Bajir Chronicles**.
+
+Here is the breakdown based on the context:
+*   **Science fantasy young adult series:** The text describes it as a ""science fantasy series of young adult books written by K. A. Applegate.""
+*   **Told in first person:** The text states, ""It is told in first person, with all six main characters taking turns narrating the books through their own perspectives.""
+*   **Set of companion books:** The text explicitly states, ""The Hork-Bajir Chronicles is the",1729,1729,0,1.003686584532261,0
+hotpotqa-003,no,"No, the Laleli Mosque and the Esma Sultan Mansion are not located in the same neighborhood.
+
+*   The **Laleli Mosque** is located in **Laleli**, which is part of the **Fatih** district in Istanbul.
+*   The **Esma Sultan Mansion** is located in **Ortaköy**, which is a neighborhood in the **Beyoğlu** district of Istanbul.
+
+Therefore, they are in different districts of the city.",1150,1150,0,0.7727534575387836,0
+hotpotqa-004,"Greenwich Village, New York City","Based on the text provided, the film *Big Stone Gap* was written and directed by **Adriana Trigiani**, who is described as an Italian American best-selling author and entrepreneur **based in Greenwich Village, New York City**.
+
+Answer: Greenwich Village",1450,1450,0,0.6235712496563792,0
+hotpotqa-005,YG Entertainment,"Based on the text provided, the group **2014 S/S** (also known as WINNER) was formed by **YG Entertainment**.
+
+The text states: ""Winner (Hangul: 위너), often stylized as WINNER, is a South Korean boy group formed in 2013 by **YG Entertainment** and debuted in 2014.""",1514,1514,0,0.7506885826587677,0
+hotpotqa-006,Eenasul Fateh,Answer: Eenasul Fateh,1932,1932,0,0.5136957075446844,0
+hotpotqa-007,"3,677 seated","Based on the text provided, the Lewiston Maineiacs played their home games at the **Androscoggin Bank Colisée**.
+
+The text states that this arena has a capacity of **4,000** (specifically noting 3,677 seated).
+
+Answer: 4,000",3127,3127,0,1.0121216652914882,0
+hotpotqa-008,Terry Richardson,"Based on the text provided:
+
+*   **Annie Morton** was born on **October 8, 1970**.
+*   **Terry Richardson** (Terrence ""Uncle Terry"" Richardson) was born on **August 14, 1965**.
+
+Comparing the two birth dates, Annie Morton is older.
+
+Answer: **Annie Morton**",1460,1460,0,0.7586477920413017,0
+hotpotqa-009,yes,"Yes, both Local H and For Against are from the United States.
+
+*   **Local H** is described as an American rock band formed in Zion, Illinois.
+*   **For Against** is described as a United States post-punk/dream pop band from Lincoln, Nebraska.",1467,1467,0,0.6544749168679118,0
+hotpotqa-010,Kansas Song,"Based on the text provided, the university whose main campus is in Lawrence, Kansas and which has branch campuses in the Kansas City metropolitan area is the **University of Kansas** (referred to as KU or Kansas).
+
+The fight song associated with this university is **Kansas Song** (also known as ""We're From Kansas"").
+
+Answer: **Kansas Song**",1825,1825,0,0.7863218756392598,0
+hotpotqa-011,David Weissman,"Based on the text provided, the screenwriter who co-wrote a film starring Nicolas Cage and Téa Leoni is **David Weissman**.
+
+The text states that *The Family Man* (2000), which stars Cage and Téa Leoni, was ""written by David Diamond and **David Weissman**."" While David Diamond is listed as a writer, David Weissman is explicitly identified as a screenwriter and director whose credits include *Evolution* (2001) and *When in Rome* (2010).",1436,1436,0,0.8895287504419684,0
+hotpotqa-012,1999,"Based on the text provided, the song ""Oh My God"" by Guns N' Roses was released in **1999** as a promo for the film *End of Days*, which starred Arnold Schwarzenegger as a former New York Police detective.",1628,1628,0,0.6595167079940438,0
+hotpotqa-013,no,"Yes, both the Random House Tower and 888 7th Avenue are used for real estate.
+
+*   **888 7th Avenue** is explicitly described as a modern-style office skyscraper that currently carries the **Vornado Realty Trust** corporate headquarters.
+*   **Random House Tower** is described as a mixed-use tower used as the headquarters of the book publisher **Random House** and a luxury apartment complex.",2861,2861,0,1.0638135001063347,0
+hotpotqa-014,from 1986 to 2013,"Based on the text provided, the football manager who recruited David Beckham was **Sir Alexander Matthew Busby** (also known as Sir Matt Busby).
+
+According to the text, Sir Matt Busby managed Manchester United from **1945 to 1969** (specifically, the first half of the 1970–71 season).
+
+Answer: 1945 to 1969",1135,1135,0,0.7311630826443434,0
+hotpotqa-015,"9,984","Based on the text provided, Brown State Fishing Lake is located in **Kansas** (specifically Brown County).
+
+According to the section ""Brown County, Kansas,"" the population of the county (as of the 2010 census) was **9,984**.
+
+Answer: 9,984",1717,1717,0,0.7315485421568155,0
+hotpotqa-016,the North Atlantic Conference,"Based on the text provided under the section ""America East Conference,"" the conference was known as the **North Atlantic Conference** from 1988 to 1996.
+
+Answer: North Atlantic Conference",1482,1482,0,0.5882429173216224,0
+hotpotqa-017,yes,"Yes, both Giuseppe Verdi and Ambroise Thomas were opera composers.
+
+*   **Giuseppe Verdi** is explicitly identified as an ""Italian opera composer"" in the provided text.
+*   **Ambroise Thomas** is described as a ""French composer, best known for his operas,"" and is listed under the ""List of major opera composers.""",1453,1453,0,0.7198074152693152,0
+hotpotqa-018,1969 until 1974,"Based on the text provided, Roger O. Egeberg served as Assistant Secretary for Health and Scientific Affairs during the Nixon administration. The text states that he was in this role ""during the Nixon administration.""
+
+Richard Nixon served from **1969 until 1974**.
+
+Answer: 1969–1974",1861,1861,0,0.7823283337056637,0
+hotpotqa-019,Robert Erskine Childers DSC,"Based on the text provided:
+
+*   **Henry Roth** is described as an ""**American** novelist and short story writer.""
+*   **Robert Erskine Childers** is described as a ""**British** writer"" (specifically noted as ""British Orientalist scholar"" and ""British writer"").
+
+Therefore, the writer from England is **Robert Erskine Childers**.",1113,1113,0,0.6788930427283049,0
+hotpotqa-020,Pedro Rodríguez,"Based on the text provided, the only other Mexican Formula One driver mentioned who has held the podium is **Sergio Pérez**.
+
+The text states: ""Sergio Pérez, the only other Mexican to finish on the podium, currently races with Sahara Force India F1 Team.""
+
+*Note: The text also mentions that Pedro Rodríguez is the only Mexican driver to have won a grand prix, but it does not explicitly state he finished on the podium in the provided context (though it is a fact of real-world knowledge).*",1437,1437,0,0.854283083230257,0
+hotpotqa-021,Sonic,"Based on the text provided, the singer of the song ""A Rather Blustery Day"" is **Jim Cummings**. The text states that Jim Cummings is known for voicing **Pete** from *Sonic the Hedgehog* (among other roles).
+
+Answer: Pete",1674,1674,0,0.6811070004478097,0
+hotpotqa-022,keyboard function keys,"Based on the text provided, the Apple Remote was originally designed to interact with the **Front Row media program** on the iSight iMac G5.
+
+The text states: ""The device was originally designed to interact with the Front Row media program on the iSight iMac G5...""
+
+(Note: While the text also mentions it is compatible with later desktop and portable Macintosh computers, the specific device it was *originally designed* for is the Front Row media program.)",1897,1897,0,0.9117517499253154,0
+hotpotqa-023,Badly Drawn Boy,"To determine which band has a higher instrument-to-person ratio, we must analyze the number of instruments each member plays and divide by the number of members in each band.
+
+**1. Wolf Alice:**
+*   **Members:** Ellie Rowsell, Joff Oddie, Theo Ellis, Joel Amey (Total: 4).
+*   **Instruments:**
+    *   Ellie Rowsell: Vocals, Guitar (2 instruments).
+    *   Joff Oddie: Guitars, Vocals (2 instruments).
+    *   Theo Ellis: Bass (1 instrument).
+    *   Joel Amey",1234,1234,0,0.9097847500815988,0
+hotpotqa-024,World's Best Goalkeeper,Peter Bolesław Schmeichel MBE,1319,1319,0,0.41614891681820154,0
+hotpotqa-025,Barton Lee Hazlewood,"Based on the text provided:
+
+*   The song ""These Boots Are Made for Walkin'"" was written by **Lee Hazlewood** (who also produced it).
+*   The person who died in 2007 is **Barton Lee Hazlewood** (also known as Lee Hazlewood), who was an American country and pop singer, songwriter, and record producer.
+
+Answer: Lee Hazlewood and Barton Lee Hazlewood",1287,1287,0,0.777229624800384,0
+hotpotqa-026,1838,1838,1965,1965,0,0.5079965414479375,0
+hotpotqa-027,yes,"Yes, both **Dictyosperma** and **Huernia** are described as genera.
+
+*   **Dictyosperma** is explicitly defined as a ""monotypic genus"" (a single species, *Dictyosperma album*).
+*   **Huernia** is explicitly defined as ""The genus Huernia"".
+
+Therefore, both species are classified as genera.",483,483,0,0.5867773331701756,0
+hotpotqa-028,Henry J. Kaiser,"Based on the text provided, the Kaiser Ventures corporation was founded by **Henry J. Kaiser** (also referred to as Henry John Kaiser), who is described in the text as an American industrialist who became known as the father of modern American shipbuilding.",1348,1348,0,0.5973643744364381,0
+hotpotqa-029,Arena of Khazan,"Based on the text provided, the adventure in the game ""Tunnels & Trolls"" designed by Ken St. Andre is **Arena of Khazan**.
+
+The text states: ""Arena of Khazan is a 1979 role-playing game adventure for 'Tunnels & Trolls' published by Flying Buffalo.""",1336,1336,0,0.6716287080198526,0
+hotpotqa-030,2000,"Based on the text provided, Poison's album **""Shut Up, Make Love""** was released on **March 14, 2000**.",1535,1535,0,0.5484189996495843,0
+hotpotqa-031,"Fujioka, Gunma","Based on the text provided, Buck-Tick hail from **Fujioka, Gunma** (specifically, they were formed in Fujioka, Gunma in 1983).",1263,1263,0,0.5339793330058455,0
+hotpotqa-032,Charles Eugène,"Based on the text provided, the French ace pilot and adventurer who flew the **L'Oiseau Blanc** (The White Bird) were **Charles Nungesser** and **François Coli**.
+
+The text explicitly states: ""The aircraft was flown by French World War I aviation heroes, **Charles Nungesser and François Coli**."" It further notes that Coli was best known as Nungesser's ""one-eyed flying partner"" in their attempt to fly the Atlantic.",1432,1432,0,0.8107506670057774,0
+hotpotqa-033,no,"No, they are not both American documentaries.
+
+*   **Freakonomics** (specifically the film *Freakonomics: The Movie*) is an **American** documentary film.
+*   **In the Realm of the Hackers** is an **Australian** documentary.",1819,1819,0,0.7225346248596907,0
+hotpotqa-034,Letters to Cleo,"Based on the text provided:
+
+*   **Letters to Cleo** has **six** members (Kay Hanley, Greg McKenna, Michael Eisenstein, Stacy Jones, Scott Riebling, and later Tom Polce).
+*   **Screaming Trees** had **four** founding members (Mark Lanegan, Gary Lee Conner, Van Conner, and Mark Pickerel) at the time of their formation, though the text notes that Barrett Martin replaced Pickerel by the time they reached their most successful period.
+
+Therefore, **Letters to Cleo** had more members.",1636,1636,0,0.9629499586299062,0
+hotpotqa-035,October 1922,"Based on the text provided, Alexander Kerensky was defeated and destroyed by the Bolsheviks during the **Russian Civil War**, which ended in **1923**.
+
+The text states: ""The war ended in 1923 in the sense that Red control of the newly formed Soviet Union was now assured..."" regarding the Russian Civil War, which is the conflict in which Kerensky's government was overthrown.",2079,2079,0,0.8899918338283896,0
+hotpotqa-036,2000,"Based on the text provided, **Seven Brief Lessons on Physics** was written by **Carlo Rovelli**. According to the text, Carlo Rovelli has worked in France since **2000**.
+
+Answer: 2000",1401,1401,0,0.6065730415284634,0
+hotpotqa-037,World War II,Answer: World War II,1075,1075,0,0.3528132075443864,0
+hotpotqa-038,no,"No, they are not located in Michigan.
+
+*   **Elko Regional Airport** is located in **Elko County, Nevada**, USA.
+*   **Gerald R. Ford International Airport** is located in **Cascade Township, Michigan**, USA.",1565,1565,0,0.6496597919613123,0
+hotpotqa-039,New York City,"Based on the text provided, Ralph Hefferline was a psychology professor at **Columbia University**. The text explicitly states that Columbia University is a ""private Ivy League research university in **Upper Manhattan, New York City**.""
+
+Answer: New York City",1459,1459,0,0.6191155416890979,0
+hotpotqa-040,Scotch Collie,"Based on the text provided, the **Scotch Collie** is the dog whose ancestors include Gordon and Irish Setters.
+
+The text states that the **Scotch Collie** ""Other ancestors include the Gordon and Irish Setters."" While the text mentions that the **Toy Manchester Terrier** was bred down from the Manchester Terrier, it does not list the Gordon and Irish Setters as ancestors of the Manchester Terrier.",1838,1838,0,0.8451354997232556,0
+hotpotqa-041,Mumbai,"Based on the text provided, Sachin Warrier worked as a software engineer at **Tata Consultancy Services** (TCS). The text states: ""He was working as a software engineer in Tata Consultancy Services in Kochi.""
+
+Tata Consultancy Services Limited (TCS) is headquartered in **Mumbai, Maharashtra**.
+
+Answer: Mumbai, Maharashtra",1338,1338,0,0.700055249966681,0
+hotpotqa-042,1962,"Based on the text provided, the manga series featuring the character Ichitaka Seto is **""I""s"" (アイズ)**.
+
+The text states that this series is ""written and illustrated by **Masakazu Katsura**.""
+
+Masakazu Katsura was born on December 10, **1962**.
+
+Answer: 1962",1937,1937,0,0.8173994161188602,0
+hotpotqa-043,sovereignty,"Based on the text provided, Giuseppe Arimondi lost his life at the **Battle of Adwa** (specifically at Adwa in Tigray).
+
+The text states that this battle was a ""decisive defeat for Italy and secured Ethiopian sovereignty.""
+
+**Answer:** Ethiopia's sovereignty (specifically the Battle of Adwa).",2089,2089,0,0.8144850004464388,0
+hotpotqa-044,Nelson Rockefeller,"Based on the text provided, Alfred Balk served as the secretary of New York Governor Nelson Rockefeller's Committee on the Employment of Minority Groups in the News Media.
+
+Answer: Nelson Rockefeller",2790,2790,0,0.814010082744062,0
+hotpotqa-045,Yellowcraig,"Based on the text provided, the medieval fortress **Dirleton Castle** is situated in the village of Dirleton, East Lothian, Scotland. The text states that the village lies on the **south shore of the Firth of Forth**.
+
+Therefore, the coastal area on the south side of which the fortress borders is the **Firth of Forth**.",1241,1241,0,0.691704916767776,0
+hotpotqa-046,Phil Spector,"The writer of the song is **Phil Spector**.
+
+Here is the breakdown based on the text provided:
+1.  The song is titled ""**To Know Him Is to Love Him**"" (the text notes it was inspired by words on a tombstone, ""To Know Him Was To Love Him"").
+2.  The text states it was ""first recorded by the only vocal group of which he was a member, the **Teddy Bears**.""
+3.  The text explicitly states, ""**To Know Him Is to Love Him** is a song written by **Phil Spector**.""
+4.  The",2662,2662,0,1.189166707918048,0
+hotpotqa-047,Organizations could come together to address global issues,"Based on the text provided, the former Soviet statesman who initiated a forum was **Mikhail Gorbachev**.
+
+He initiated the **World Summit of Nobel Peace Laureates** (specifically, the World Summit of Nobel Peace Laureates was initiated by Mikhail Gorbachev in the 90s).",2224,2224,0,0.8315110420808196,0
+hotpotqa-048,yes,"Yes, both **Ferocactus** and **Silene** are types of plants.
+
+*   **Silene** refers to a genus of flowering plants in the family Caryophyllaceae (commonly known as campion or catchfly).
+*   **Ferocactus** refers to a genus of large barrel-shaped cacti.
+
+Both are distinct groups of vascular plants.",1474,1474,0,0.7481958754360676,0
+hotpotqa-049,English Electric Canberra,"Based on the text provided, the British first-generation jet-powered medium bomber used in the South West Pacific theatre of World War II was the **English Electric Canberra**.
+
+The text notes that the Canberra was developed in response to a 1944 requirement for a successor to the de Havilland Mosquito and became the service's first jet-powered bomber when it entered service with the Royal Air Force in May 1951. It was subsequently deployed to the South West Pacific theatre during World War II, where it was used as a bomber unit (specifically mentioned in the context of the squadron No. 2 Squadron RAAF",1795,1795,0,1.0129369162023067,0
+hotpotqa-050,2009 Big 12 Conference,"Based on the text provided, the 14th season for the Big 12 Conference occurred during the **2009** NCAA Division I FBS football season.
+
+This is confirmed by the entry titled ""2009 Big 12 Conference football season,"" which states: ""The 2009 Big 12 Conference football season was the **14th season** for the Big 12..."". The record of 2–6 in conference play is also listed in the same entry (""...2–6 in Big 12 play"").
+
+Answer: **2009**",1534,1534,0,0.9633483327925205,0
+hotpotqa-051,"1,462","Based on the text provided, **Euromarché** was bought by **Carrefour** in June 1991.
+
+The text states that Carrefour operates in more than 30 countries (including Europe) and that at the end of 2016, it had **1,462 hypermarkets**.
+
+Answer: **1,462 hypermarkets**",1517,1517,0,0.7631690828129649,0
+hotpotqa-052,Indianapolis Motor Speedway,"Based on the text provided, the race track located in the midwest that hosts a 500-mile race every May is the **Indianapolis Motor Speedway**.
+
+The text states that the Indianapolis Motor Speedway is located in Speedway, Indiana (which is in the Midwest), and the **1964 Armstrong 500** was held on **4 October 1964** at the track. While the text does not explicitly say ""every May"" for the 1964 race (it was a specific year), it is the only track mentioned in the context of hosting a 500-mile race",1610,1610,0,0.9795887498185039,0
+hotpotqa-053,Rome,"Based on the text provided, the ""Prince of tenors"" refers to **Franco Corelli**. The text states that he had a major international opera career and specifically mentions that he ""appeared on the stages of most of the major opera houses in Europe and with opera companies throughout North America.""
+
+The text also notes that the film *Tosca* (1956), which starred Franco Corelli, was directed by Carmine Gallone and was based on the opera *Tosca* by Giacomo Puccini.
+
+Therefore, Franco Corelli starred in the film *Tosca* in **Rome**",1564,1564,0,0.9704270428046584,0
+hotpotqa-054,"Max Martin, Savan Kotecha and Ilya Salmanzadeh","Based on the text provided, Ellie Goulding worked with the following writers on her third studio album, **Delirium**:
+
+*   **Savan Kotecha**
+*   **Ilya Salmanzadeh**
+*   **Max Martin**
+*   **Ali Payami**
+
+Additionally, the text notes that **DJ Fresh** (who produced the song ""Flashlight"") assisted in writing the song ""Flashlight,"" which was included on the album.",1545,1545,0,0.8388271667063236,0
+hotpotqa-055,"Marion, South Australia","Based on the text provided, the answer is **Marion, South Australia**.
+
+Here is the breakdown of the clues:
+*   **Founded in 1838:** The text states, ""Marion is a suburb... Founded as a rural village in 1838...""
+*   **Boarding school opened by a Prime Minister of Australia:** The text states, ""Westminster School is an independent... boarding school... opened by the Prime Minister Robert Menzies in 1961.""
+*   **Named after a school in London:** The text states Westminster School is ""named after Westminster School",1960,1960,0,1.050187417306006,0
+hotpotqa-056,Drifting,"Based on the text provided, **D1NZ** is a production car drifting series in New Zealand. The text explicitly states that it is a series based on the drifting technique known as **drifting** (specifically defined in the text as ""a driving technique where the driver intentionally oversteers..."").
+
+Answer: drifting",1431,1431,0,0.6835429575294256,0
+hotpotqa-057,Keith Bostic,"Based on the text provided:
+
+*   **Keith Bostic** was born on **January 17, 1961**.
+*   **Jerry Glanville** was born on **October 14, 1941**.
+
+Comparing the birth years, Jerry Glanville is older (born in 1941) than Keith Bostic (born in 1961). Therefore, **Keith Bostic** is younger.",1654,1654,0,0.8705885000526905,0
+hotpotqa-058,"35,124","Based on the text provided, **Kirton End** is a hamlet located in the civil parish of Kirton within the **Boston district of Lincolnshire, England**.
+
+The text states that Kirton End lies ""4 mi south-west from Boston."" Therefore, the city in which Kirton End is located is **Boston**.
+
+According to the 2001 census, the population of **Boston** was **35,124**.
+
+Answer: 35,124",1595,1595,0,0.8707915833219886,0
+hotpotqa-059,no,"Yes, both **Cypress** and **Ajuga** are genera.
+
+*   **Cypress** is a genus of coniferous trees (family Cupressaceae).
+*   **Ajuga** is a genus of herbaceous flowering plants (family Lamiaceae).",1132,1132,0,0.5987720414996147,0
+hotpotqa-060,shortest player ever to play in the National Basketball Association,"Based on the text provided, the distinction held by this player is that he was the **shortest player ever to play in the National Basketball Association**.
+
+The text identifies him as **Muggsy Bogues**, noting that he played point guard for four teams (including the Charlotte Hornets) during his 14-season career and served as the head coach of the now-defunct WNBA team Charlotte Sting.",2019,2019,0,0.8594383746385574,0
+hotpotqa-061,Ronald Shusett,"Based on the text provided, the films that have a score composed by Jerry Goldsmith are:
+
+*   **Alien (film)**: The text states, ""The film's title refers to a highly aggressive extraterrestrial creature..."" and mentions that the film was produced by Gordon Carroll, David Giler, and Walter Hill.
+*   **Legend (film score)**: The text states, ""Legend: The Music of Jerry Goldsmith is a musical film score... released in 1986"".
+*   **Total Recall (1990 film)**: The text states, ""The original score composed by",1540,1540,0,0.9630835419520736,0
+hotpotqa-062,Adeline Virginia Woolf,"Based on the text provided:
+
+*   **Emma Bull** was born on **December 13, 1954**.
+*   **Virginia Woolf** was born on **25 January 1882**.
+
+Virginia Woolf was born earlier.",1230,1230,0,0.6122999163344502,0
+hotpotqa-063,821,"Based on the text provided, the nursery rhyme ""What Are Little Boys Made Of?"" is the inspiration for the episode titled ""What Are Little Girls Made Of?"". The text states that the title of the episode is taken from the fourth line of the nursery rhyme ""What Are Little Boys Made Of?"".
+
+The Roud Folk Song Index number for ""What Are Little Boys Made Of?"" is **821**.
+
+Answer: 821",970,970,0,0.7089495845139027,0
+hotpotqa-064,more than 70 countries,"Based on the text provided, Scott Parkin has been a vocal critic of ExxonMobil and **Halliburton**.
+
+According to the text describing Halliburton: ""The Halliburton Company... has operations in **more than 70 countries**.""
+
+Answer: more than 70",1193,1193,0,0.6122207911685109,0
+hotpotqa-065,Charmed,"Based on the text provided, Rose McGowan is best known for playing **Paige Matthews** in the WB supernatural drama series **""Charmed""**.
+
+The text explicitly states: ""She is best known to television audiences for having played Paige Matthews in The WB supernatural drama series 'Charmed' from 2001 to 2006."" It also notes that she joined the series in the fourth season following the departure of Shannen Doherty.",1609,1609,0,0.8330617919564247,0
+hotpotqa-066,International Boxing Hall of Fame,Answer: International Boxing Hall of Fame (IBHOF),2123,2123,0,0.5832701250910759,0
+hotpotqa-067,Usher,"Based on the text provided, the singer is **Usher**.
+
+The text states: ""Yeah! (Usher song) is a song by American singer Usher... The song was released as the lead single from Usher's fourth studio album 'Confessions'... It reached number one on the Billboard Hot R&B/Hip-Hop Singles & Tracks chart... and stayed at number one for eight consecutive weeks.""",2215,2215,0,0.9133435823023319,0
+hotpotqa-068,Bill Murray,"Based on the text provided, the younger brother of the episode guest stars of *The Hard Easy* (specifically Prince Huge) is **Jonathan Katz**.
+
+The text states: ""The episode guest stars Brian Doyle-Murray as Prince Huge and **Jonathan Katz** as the Mudscamp elder.""",1441,1441,0,0.664169916883111,0
+hotpotqa-069,Carabao Cup,"Based on the text provided, the 2017–18 Wigan Athletic F.C. season will be a year in which the team competes in the league cup known as the **Carabao Cup** for sponsorship reasons.
+
+(Note: The text explicitly states that the EFL Cup is ""currently known as the Carabao Cup for sponsorship reasons."")",1459,1459,0,0.7270431667566299,0
+hotpotqa-070,Teen Titans Go!,"Tara Strong voiced the character **Raven** in the animated series ""Teen Titans"".",1436,1436,0,0.4806898748502135,0
+hotpotqa-071,"276,170 inhabitants","Based on the text provided, the **122nd SS-Standarte** was formed in the city of **Strasbourg** during World War II.
+
+According to the ""Strasbourg"" section of the text, the population of the city proper in 2014 was **276,170**.
+
+Answer: **276,170**",1216,1216,0,0.6942260833457112,0
+hotpotqa-072,orange,"Based on the text provided, people in the Netherlands who celebrate the national holiday **Koningsdag** (King's Day) wear **orange** clothing.
+
+The text explicitly states: ""It manifests itself in the wearing of orange clothing such as T-shirts, caps and scarfs... and the decoration of cars, rooms, houses, shops, and even entire streets in orange, the traditional color of the Dutch royal family...""
+
+Additionally, the text notes that during major sporting events, people wear orange clothing, and specifically mentions that during Koningsdag, the traditional color of the Dutch royal family (the House of Orange-Nassau)",1586,1586,0,0.9724376248195767,0
+hotpotqa-073,Tromeo and Juliet,Tromeo and Juliet,1644,1644,0,0.45660837460309267,0
+hotpotqa-074,William Jefferson Clinton,"Based on the text provided, Robert Suettinger served as the national intelligence officer for East Asia under **Bill Clinton** (who was the Governor of Arkansas) from 1997 to 1998.
+
+Answer: Bill Clinton",1127,1127,0,0.5622063335031271,0
+hotpotqa-075,John John Florence,John John Florence,947,947,0,0.3206835426390171,0
+hotpotqa-076,Ann,Sela Ward,1113,1113,0,0.3479325417429209,0
+hotpotqa-077,Apalachees,"Based on the text provided, Alvaro Mexia was given a diplomatic mission to the **Ais** native populations living south of St. Augustine and in the Cape Canaveral area.
+
+(Note: The text contains a typo where ""Ais"" is written as ""Ais native populations""; historically, this refers to the **Ais** people, an Indigenous Australian group.)",1655,1655,0,0.7734640408307314,0
+hotpotqa-078,British,"Based on the text provided:
+
+*   **Alfred Gell** is described as a **British** social anthropologist.
+*   **Edmund Leach** is described as a **British** social anthropologist.
+
+Answer: Both Alfred Gell and Edmund Leach were British.",1499,1499,0,0.6699782079085708,0
+hotpotqa-079,1865,"Based on the text provided, the 1925 Birthday Honours were appointments made to celebrate the official birthday of **King George V**. The text explicitly states that George V was born on **3 June 1865**.
+
+Answer: 1865",1228,1228,0,0.6015671249479055,0
+hotpotqa-080,Newport,"Based on the text provided, **East Lempster** is an unincorporated community located in the town of **Lempster** in **Sullivan County**, New Hampshire.
+
+The text states that Lempster is a town in Sullivan County. It does not explicitly name a different ""county seat"" for Lempster itself (as it is an unincorporated community), but it notes that the town of Lempster is part of the larger town of **East Lempster** (which includes the village of East Lempster).
+
+However, the question asks for the county seat of the county where",1457,1457,0,0.9504177495837212,0
+hotpotqa-081,Bob Seger,"Based on the text provided, the Rock singer Robert Clark Seger (born May 6, 1945) performed and recorded as **Bob Seger** and the Last Heard and **Bob Seger System** throughout the 1960s.
+
+However, the specific album *Against the Wind* is described as being his **fourth** album with the **Silver Bullet Band**, not his 11th album. The text states that in 1973, he put together the **Silver Bullet Band**, with whom he became most successful.
+
+Therefore, the stage name associated with the album *Against the Wind",1598,1598,0,0.9738289173692465,0
+hotpotqa-082,Conscription,"Based on the text provided, the Supreme Court held that the practice of requiring only men to register for the draft (which was the method used to fill vacancies) was constitutional.
+
+Answer: requiring only men to register for the draft",2088,2088,0,0.7153137903660536,0
+hotpotqa-083,"Mondelez International, Inc.","Based on the text provided, **Handi-Snacks** are a snack food product line sold by **Mondelez International** (also stylized as Mondelēz).
+
+The text explicitly states: ""Handi-Snacks are a snack food product line sold by **Mondelez International**."" It further confirms that Mondelez International is an ""American multinational confectionery, food, and beverage company based in Illinois.""
+
+**Answer:** Mondelez International",1317,1317,0,0.7877955418080091,0
+hotpotqa-084,Monica Lewinsky,Monica Lewinsky,1747,1747,0,0.46979479119181633,0
+hotpotqa-085,"April 1, 1949","Based on the text provided, the American lawyer, lobbyist, and political consultant who was a senior member of the presidential campaign of Donald Trump is **Paul Manafort**.
+
+According to the first sentence of the context, Paul Manafort was born on **April 1, 1949**.",1747,1747,0,0.7052022498100996,0
+hotpotqa-086,1866,"Based on the text provided, the novel ""Nina"" was based on the novel ""Crime and Punishment"" by Fyodor Dostoyevsky. The text states that ""Crime and Punishment"" was first published in the literary journal ""The Russian Messenger"" in **twelve monthly installments during 1866**.
+
+Answer: 1866",1206,1206,0,0.6899145832285285,0
+hotpotqa-087,"Canary Islands, Spain","Based on the text provided:
+
+*   **Teide National Park** is located in **Tenerife** (specifically, it is a national park located in Tenerife, Canary Islands, Spain).
+*   **Garajonay National Park** is located in **La Gomera** (specifically, it is located in the center and north of the island of La Gomera, in the province of Santa Cruz de Tenerife, Spain).
+
+**Answer:** Teide National Park is located in Tenerife, and Garajonay National Park is located in La Gomera.",1289,1289,0,0.8814065419137478,0
+hotpotqa-088,250 million,"Based on the text provided, the specific anecdote mentioned is ""Mrs. Bixby and the Colonel's Coat,"" which is described as ""Dahl's variation on a popular anecdote dating back at least to 1939.""
+
+The text does not provide a specific sales figure (e.g., ""sold 5 million copies"") for this specific anecdote or the collection of stories it belongs to. It only states that the collection contains ""many of Dahl's stories"" and that the collection ""has sold more than 250 million copies worldwide.""
+
+Therefore, the text does not contain the answer to the specific",1051,1051,0,0.8886939994990826,0
+hotpotqa-089,director,"Based on the text provided:
+
+*   **Chris Menges** is described as an ""English **cinematographer and film director**.""
+*   **Aram Avakian** is described as an ""Armenian-American **film editor and director**.""
+
+Both individuals share the occupation of **film director**.",949,949,0,0.6001861672848463,0
+hotpotqa-090,The Conversation,"Based on the text provided, Andrew Jaspan was the co-founder of **The Conversation**.
+
+The text states: ""Andrew Jaspan... the co-founder of 'The Conversation', an independent not-for-profit website of analysis and news from the university and research sector"".",1211,1211,0,0.5858662500977516,0
+hotpotqa-091,John Waters,John Waters,919,919,0,0.31512187514454126,0
+hotpotqa-092,Las Vegas Strip in Paradise,"Based on the text provided, Bill Cosby's third album, *Why Is There Air?*, was recorded at the **Flamingo Hotel** (formerly The Fabulous Flamingo and Flamingo Hilton Las Vegas) in Las Vegas, Nevada.
+
+Answer: The Flamingo Hotel (formerly The Fabulous Flamingo and Flamingo Hilton Las Vegas)",918,918,0,0.6358262086287141,0
+hotpotqa-093,no,"No, the drinks **Gibson** and **Zurracapote** do not both contain gin.
+
+*   **Gibson**: The text explicitly states it is a mixed drink made with **gin and vermouth**.
+*   **Zurracapote**: The text describes it as a drink consisting of **red wine** mixed with fruit, sugar, and cinnamon. It does not mention gin.
+
+Therefore, only the Gibson contains gin.",1209,1209,0,0.7563039576634765,0
+hotpotqa-094,March and April,"Based on the text provided, the festival described is the **London International Documentary Festival (LIDF)**. The text states that LIDF ""takes place in the months of **March and April** every year.""
+
+The answer is: **March and April**",1151,1151,0,0.5752852084115148,0
+hotpotqa-095,Fairfax County,"Tysons Galleria is located in **McLean**, which is a census-designated place (CDP) in **Fairfax County**, Virginia.
+
+Although Tysons Galleria is situated within the unincorporated community of Tysons Corner (which is geographically part of Fairfax County), it is not a city itself. Therefore, the primary county it is located in is **Fairfax County**.",1356,1356,0,0.7240897919982672,0
+hotpotqa-096,IT products and services,"Based on the text provided, Bordan Tkachuk was the former CEO of **Viglen**.
+
+According to the text, Viglen Ltd provides **IT products and services**, including storage systems, servers, workstations, and data/voice communications equipment and services.",1722,1722,0,0.6838602079078555,0
+hotpotqa-097,Levni Yilmaz,"Based on the text provided, **Lev Yilmaz** is the filmmaker known for animation.
+
+The text states that Lev Yilmaz is a ""San Francisco based independent film maker, artist and publisher, best known for his 'Tales of Mere Existence' animated comic series."" While Pamela B. Green is also described as a ""film producer and director known for her work in feature film titles and motion graphics,"" Lev Yilmaz is explicitly identified as the one best known for animation in the provided context.",2115,2115,0,0.9773010006174445,0
+hotpotqa-098,Beijing,"Based on the text provided, the **Moroccan Ambassador to China** is the official representative of the Government in **Rabat** to the Government of the People's Republic of China.
+
+Therefore, the ambassador is based in **Rabat**.",1276,1276,0,0.5824925415217876,0
+hotpotqa-099,no,"No, Yingkou and Fuding are not the same level of city.
+
+*   **Yingkou** is a **prefecture-level city** (a first-tier sub-provincial city) located in Liaoning Province.
+*   **Fuding** is a **county-level city** located in Fujian Province.
+
+Therefore, Yingkou is a higher administrative level than Fuding.",769,769,0,0.62987529207021,0
+hotpotqa-100,"Coahuila, Mexico","Based on the text provided, the descendants of the Black Seminoles settled in **distinct bands near the Native American Seminole** in **Spanish Florida** and **Oklahoma**.
+
+Specifically, the text states: ""They are the descendants of free blacks and of escaped slaves... Historically, the Black Seminoles lived mostly in distinct bands near the Native American Seminole."" It further notes that the Seminole Nation of Oklahoma (which includes these descendants) is headquartered in Wewoka within Seminole County, Oklahoma.",1431,1431,0,0.8581170411780477,0
+hotpotqa-101,Larnelle Harris,"Based on the text provided, David Huntsinger has worked with **Larnelle Harris**, who was born in the month of **July** (specifically July 6).
+
+Answer: Larnelle Harris",1650,1650,0,0.6536857923492789,0
+hotpotqa-102,2003,"Based on the text provided, the ""first round draft pick out of the University"" is **Robin Cole**, who was drafted by the Pittsburgh Steelers in the first round of the **1980** NFL Draft (specifically mentioned as the 1980 draft in the context of his Super Bowl XIV start).
+
+The brother of Robin Cole, **Champ Bailey**, was drafted by the Washington Redskins in the **1999** NFL Draft (specifically mentioned as the first round of the 1999 NFL Draft).
+
+Answer: 1999",2352,2352,0,1.087043957784772,0
+hotpotqa-103,North Avenue at Techwood Drive,"The stadium where the 1964 Georgia Tech Yellow Jackets football team played their home game is located at the Georgia Institute of Technology in Atlanta, Georgia.
+
+Specifically, it is **Grant Field** (now known as Bobby Dodd Stadium), which is situated on the school's Atlanta campus.",1558,1558,0,0.6803970420733094,0
+hotpotqa-104,Leo Varadkar,Leo Varadkar,1700,1700,0,0.4655258748680353,0
+hotpotqa-105,George Raft,George Raft,1373,1373,0,0.40059550013393164,0
+hotpotqa-106,1887,"Based on the text provided, the play *Three Men on a Horse* is by George Abbott and John Cecil Holm. The text states that **George Francis Abbott** was born on **June 25, 1887**.
+
+Answer: 1887",1534,1534,0,0.6631276663392782,0
+hotpotqa-107,business,"Based on the text provided, both **Owner earnings** and **Warren Buffett** are related to the concept of **value investing** (specifically, the ""Warren Buffett Way"").
+
+*   **Warren Buffett** is explicitly described as a ""successful investor"" and the ""Chief Executive Officer and Chairman of Berkshire Hathaway,"" with a focus on value investing principles.
+*   **Owner earnings** is described as a ""valuation method detailed by Warren Buffett in 1986,"" which is a core component of his investment philosophy.
+
+Therefore, the common activity is **value investing** (or investment analysis).",1329,1329,0,0.930226749740541,0
+hotpotqa-108,7 October 1978,"Based on the text provided, the former Indian cricketer who made his ODI debuts during the 2000 ICC KnockOut Trophy is **Zaheer Khan**.
+
+The text states: ""Zaheer Khan (born 7 October 1978) is a former Indian cricketer who played all forms of the game for Indian national cricket team from 2000 till 2014.""
+
+Answer: 7 October 1978",1839,1839,0,0.9218782503157854,0
+hotpotqa-109,B-17 Flying Fortress bomber,"Based on the text provided, the 514th Flight Test Squadron is stationed at **Hill Air Force Base**. The text states that this base was named in honor of Major Ployer Peter Hill, who died test-flying a prototype of the **B-17 Flying Fortress** bomber.
+
+Answer: B-17 Flying Fortress",1144,1144,0,0.6499182498082519,0
+hotpotqa-110,Blake Shelton,"Based on the text provided, the album ""Based on a True Story..."" is an album by the country music star **Blake Shelton**.
+
+The text explicitly states: ""It was released on March 26, 2013 via Warner Bros. Records and debuted at #3 with a career best for Shelton at nearly 200,000 sold."" It further confirms that ""My Eyes"" is a song recorded by Blake Shelton featuring Gwen Sebastian, released as the fifth single from this album.",1722,1722,0,0.9130196254700422,0
+hotpotqa-111,three centuries,"Based on the text provided, the ""dwelling place of the dead"" (referring to the Sinagua dwellings at Montezuma Castle National Monument) was built over the course of **three centuries**.
+
+The text states: ""The main structure comprises five stories and twenty rooms, and was built over the course of three centuries.""",1468,1468,0,0.6973000830039382,0
+hotpotqa-112,7 January 1936,1936,1275,1275,0,0.3873749580234289,0
+hotpotqa-113,George Archainbaud,"Answer: George Archainbaud died first.
+
+**Reasoning:**
+*   **George Archainbaud** died on **February 20, 1959**.
+*   **Ralph Murphy** died on **February 10, 1967**.
+
+Therefore, George Archainbaud passed away before Ralph Murphy.",1215,1215,0,0.6753757074475288,0
+hotpotqa-114,picric acid,"Based on the text provided, the component of shellite with the formula **(ON)CHOH** is **Picric acid**.
+
+The text states: ""Picric acid is an organic compound with the formula (ON)CHOH.""",1258,1258,0,0.5724228331819177,0
+hotpotqa-115,230,"Based on the text provided, the record holder for the Argentine PGA Championship is Roberto De Vicenzo. The text states that he ""won more than 230 tournaments worldwide in his career.""
+
+Answer: more than 230",1427,1427,0,0.6648874580860138,0
+hotpotqa-116,Marvel,"Based on the text provided, the album **Suicide** (1977) features a song based on the **Marvel Comics** character **Ghost Rider**.
+
+The text states: ""Ghost Rider is a song by the protopunk band Suicide appearing on their debut album. The song is based on the **Marvel Comics character**.""",1291,1291,0,0.6775972498580813,0
+hotpotqa-117,United States Senator,"Based on the text provided, the person who introduced the DISCLOSE Act (H.R. 5175) was **Chris Van Hollen**.
+
+According to the section on ""Chris Van Hollen,"" he served as the **U.S. Representative for Maryland's 8th congressional district** from 2003 to 2017 before becoming a U.S. Senator.
+
+Therefore, the other political position he held was **U.S. Representative** (specifically for Maryland's 8th congressional district).",1523,1523,0,0.885468834079802,0
+hotpotqa-118,no,"No, the bands **Skin Yard** and **Ostava** were not both from the U.S.
+
+*   **Skin Yard** was an **American** grunge band from **Seattle, Washington**.
+*   **Ostava** is an **alternative rock band from **Bulgaria**.",1235,1235,0,0.6380657078698277,0
+hotpotqa-119,yes,"Yes, both Daryl Hall and Gerry Marsden are musicians.
+
+*   **Daryl Hall** is an American rock, R&B, and soul singer, keyboardist, guitarist, and songwriter who is best known as the lead vocalist of the musical duo Hall & Oates.
+*   **Gerry Marsden** is an English musician and television personality who is best known as the leader of the British Merseybeat band Gerry and the Pacemakers.",1338,1338,0,0.7859071251004934,0
+hotpotqa-120,The A41,"Based on the text provided, the major truck road located in Backford Cross is the **A5117 road**.
+
+The text states that the A5117 ""crosses the A41 by way of a roundabout at Backford Cross"" and serves as a route connecting the A550 to the M56, forming a bypass to Chester.",1433,1433,0,0.7313871663063765,0
+hotpotqa-121,Princess Jessica,"Based on the text provided, Caroline Carver played the role of **Princess Jessica** in the 1999 Hallmark Entertainment made-for-TV fantasy movie *The Magical Legend of the Leprechauns*.",1053,1053,0,0.5203237915411592,0
+hotpotqa-122,The Spiderwick Chronicles,"Based on the text provided, the film is **The Spiderwick Chronicles**.
+
+The description matches the following details:
+*   It is a **2008 American fantasy adventure film**.
+*   It features **Sarah Bolger** as a star.
+*   It is based on a story involving a **New England family** (specifically the Grace family) who discover a field guide to faeries and battle magical creatures in the **Spiderwick Estate** in New England.",1244,1244,0,0.7882779575884342,0
+hotpotqa-123,KKR & Co,Answer: Kohlberg Kravis Roberts,1209,1209,0,0.38791949953883886,0
+hotpotqa-124,The Bye Bye Man,"Based on the text provided, **Cressida Bonas** is the youngest daughter of Lady Mary-Gaye Curzon. The text states that she is an English actress, dancer, and model who is the youngest daughter of Lady Mary-Gaye Curzon and entrepreneur Jeffrey Bonas.
+
+The text also mentions that **Bottom of the World** is a 2017 drama film that stars **Jena Malone**, **Douglas Smith**, and **Ted Levine**. It does not list Cressida Bonas in this specific cast list.
+
+However, the text explicitly states that **Cressida Bonas** is the youngest",1439,1439,0,0.9436979163438082,0
+hotpotqa-125,Richmond,"Based on the text provided, **Mummulgum** is located on Shannon Brook between Tenterfield and Casino on the Bruxner Highway.
+
+The text states that **Casino** lies on the banks of the **Richmond River**. Since Mummulgum is located on the Bruxner Highway leading to Casino, it is the stop before reaching Casino, which is situated on the banks of the Richmond River.
+
+Answer: **Richmond River**",1120,1120,0,0.7418670002371073,0
+hotpotqa-126,Owsley Stanley,Owsley Stanley,1672,1672,0,0.45273412577807903,0
+hotpotqa-127,the late 12th Century,"Based on the text provided, Columba de Dunbar died at **Spynie Palace** (also known as Spynie Castle).
+
+The text states that Spynie Palace was the fortified seat of the Bishops of Moray for about 500 years, and the founding of the palace dates back to the **late 12th Century**.
+
+Answer: **The late 12th Century**",1379,1379,0,0.742082541808486,0
+hotpotqa-128,"San Luis Obispo, California","Based on the text provided, the Bubblegum Alley located in California is in **downtown San Luis Obispo**, California.
+
+The text states: ""Bubblegum Alley is a tourist attraction in **downtown San Luis Obispo**, California, known for its accumulation of used bubble gum on the walls...""
+
+(Note: While the text also mentions a ""Bubblegum Alley"" in San Francisco on Folsom Street, the specific alley described as being ""similar to Gum Wall"" is the one in San Luis Obispo.)",1439,1439,0,0.8680907916277647,0
+hotpotqa-129,Mercedes-Benz Superdome,"The January 2, 2012 game featured the University of Louisville team at **Papa John's Cardinal Stadium**.
+
+This is confirmed by the text stating: ""The Cardinals were led by third-year head coach Charlie Strong and played their home games at Papa John's Cardinal Stadium.""",1726,1726,0,0.7030850406736135,0
+hotpotqa-130,LaLee's Kin: The Legacy of Cotton,"Answer: **LaLee's Kin: The Legacy of Cotton**
+
+**Reasoning:**
+The text explicitly states that *LaLee's Kin: The Legacy of Cotton* ""was nominated for Best Documentary Feature at the 74th Academy Awards."" In contrast, the text describing *Gimme Shelter* (1970) notes that it ""was not entered into the main competition"" at the 1971 Cannes Film Festival.",1132,1132,0,0.7367319166660309,0
+hotpotqa-131,Pirate's Cove,"Based on the text provided:
+
+*   **Pirate's Cove** was originally published in **2002** (with a republished edition in 2003).
+*   **Catan** was first published in **1995**.
+
+Therefore, **Pirate's Cove** was the board game published most recently.",1435,1435,0,0.713069916702807,0
+hotpotqa-132,Crystal Dynamics,"Based on the text provided, Alice David is the voice of the French dub of Lara Croft in the video game **""Tomb Raider""**.
+
+The text states: ""Alice David (born 22 March 1987) is a French actress... She is the voice of the French dub of Lara Croft in the video game 'Tomb Raider'.""
+
+While the text does not explicitly name the specific company that developed the game *Tomb Raider* (it mentions Core Design and Crystal Dynamics), the question asks for the company Alice David voiced Lara Croft in. The answer is the game title itself, which",1765,1765,0,1.011043124832213,0
+hotpotqa-133,"""The Marshall Mathers LP 2""","Based on the text provided, the singer with the album titled ""Unapologetic"" is **Rihanna**. The text states that her song ""Numb"" features guest vocals by Eminem. Therefore, the Eminem album that included vocals from this singer is **The Marshall Mathers LP 2**.
+
+Answer: The Marshall Mathers LP 2",2068,2068,0,0.8246711250394583,0
+hotpotqa-134,Suicide Squad,"Based on the text provided:
+
+1.  **David Ayer** is identified as the writer and director of **""End of Watch""**, **""Street Kings""**, **""Sabotage""**, and **""Fury""**.
+2.  The text states that **""Harsh Times""** was written and directed by David Ayer.
+
+Therefore, the other film is **Harsh Times**.
+
+Answer: **Harsh Times**",1293,1293,0,0.7526791663840413,0
+hotpotqa-135,Jillian Belk,"Based on the text provided, **Jillian Bell** is the actress who starred in the series *SuperMansion* (listed as ""Jillian Bell"" in the context). The text states that she is best known for her recurring roles as **Jillian Belk** on the series *Workaholics*.
+
+Answer: Jillian Belk",1879,1879,0,0.7824799166992307,0
+hotpotqa-136,Texas Tech University,"Based on the text provided, the 1974 Texas Tech Red Raiders football team represented **Texas Tech University** (often referred to as Texas Tech, Tech, or TTU), which is a public research university located in Lubbock, Texas.",1739,1739,0,0.6799995424225926,0
+hotpotqa-137,Lord Combermere,"Based on the text provided, the answer is **Stapleton Cotton, 1st Viscount Combermere**.
+
+Here is the breakdown based on the context:
+*   **Stapleton Cotton, 1st Viscount Combermere** is explicitly described as having commanded the cavalry in the latter stages of the Peninsular War and is credited with storming Bharatpur (a fort previously deemed impregnable).
+*   **Field Marshal Sir Claude Auchinleck** is credited with supporting the British forces during the **Siege of Bharatpur (1805)** (which took place in",1686,1686,0,0.9988841256126761,0
+hotpotqa-138,"seasonal television specials, particularly its work in stop motion animation","Based on the text provided, the production company for *The Year Without a Santa Claus* (2006) is Rankin/Bass Productions.
+
+The text states that Rankin/Bass Productions is known for its **seasonal television specials**, particularly its work in **stop motion animation**.
+
+Answer: **Seasonal television specials (specifically stop motion animation)**",2139,2139,0,0.8827672097831964,0
+hotpotqa-139,2014,"Based on the text provided, the film that starred the composer (Nat Wolff) is **The Fault in Our Stars**.
+
+According to the section titled ""The Fault in Our Stars,"" the film was released in **2014**.
+
+Answer: 2014",1145,1145,0,0.5875071249902248,0

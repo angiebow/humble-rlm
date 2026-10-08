@@ -1,0 +1,11 @@
+config,qid,gold_answer,answer,f1,correct,token_footprint,recursion_depth,retrieval_recall,retrieval_precision
+dragin_rlm_hotpotqa,hotpotqa-000,yes,,0.0,False,0,0,,
+dragin_rlm_hotpotqa,hotpotqa-001,Chief of Protocol,,0.0,False,0,0,,
+dragin_rlm_hotpotqa,hotpotqa-002,Animorphs,,0.0,False,0,0,,
+dragin_rlm_hotpotqa,hotpotqa-003,no,,0.0,False,0,0,,
+dragin_rlm_hotpotqa,hotpotqa-004,"Greenwich Village, New York City",,0.0,False,0,0,,
+dragin_rlm_hotpotqa,hotpotqa-005,YG Entertainment,,0.0,False,0,0,,
+dragin_rlm_hotpotqa,hotpotqa-006,Eenasul Fateh,,0.0,False,0,0,,
+dragin_rlm_hotpotqa,hotpotqa-007,"3,677 seated",,0.0,False,0,0,,
+dragin_rlm_hotpotqa,hotpotqa-008,Terry Richardson,,0.0,False,0,0,,
+dragin_rlm_hotpotqa,hotpotqa-009,yes,,0.0,False,0,0,,

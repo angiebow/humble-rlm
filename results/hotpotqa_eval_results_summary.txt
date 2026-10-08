@@ -15,4 +15,4 @@ EFFICIENCY Metrics:
   - Recursion Depth (max):  0 iterations
 
 Questions evaluated: 10
-Config: dragin_rlm
+Config: dragin_rlm_hotpotqa

@@ -1,0 +1,14 @@
+# litellm proxy for HotpotQA evaluation: routes 2B worker on local mlx_lm.server
+model_list:
+  - model_name: qwen35-worker-hotpotqa
+    litellm_params:
+      model: vllm/mlx-community/Qwen3.5-2B-4bit
+      api_base: http://localhost:8005/v1
+
+general_settings:
+  port: 4005
+
+router_settings:
+  disable_cooldowns: true
+  allowed_fails: 999999
+  cooldown_time: 0

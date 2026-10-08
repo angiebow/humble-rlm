@@ -1,0 +1,10 @@
+
+====== HotpotQA Direct Evaluation (Local Qwen) ======
+
+ACCURACY: 0.800
+F1 Score: 0.156
+Avg Tokens: 1668
+Total Tokens: 16677
+
+Questions: 10
+Endpoint: http://localhost:8005/v1/chat/completions
