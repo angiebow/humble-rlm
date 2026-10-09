@@ -2,7 +2,7 @@
 run_dragin() itself this can be exercised directly without real hardware.
 """
 
-from dragin_rlm.harness import _extract_answer
+from dragin_rlm.harness import DraginConfig, _build_result, _extract_answer
 
 
 def test_extract_answer_uses_the_cue_when_present():
@@ -33,3 +33,49 @@ def test_extract_answer_empty_with_no_fallback_available():
     answer, source = _extract_answer("   ", worker_fallback="")
     assert answer == ""
     assert source == "worker_fallback"
+
+
+def _cfg():
+    return DraginConfig(model_path="unused", worker_model="unused")
+
+
+def _result(triggers):
+    return _build_result(
+        "", 0.0, 0, 1, triggers, False, _cfg(), 0.0, None, 0, 0, partial=False,
+    )
+
+
+def test_fallback_skips_empty_latest_worker_answer():
+    # Regression: the last retrieval's worker reply was "" (thinking ate the
+    # token budget), which used to make the whole answer empty even though an
+    # earlier retrieval had a real worker answer.
+    triggers = [
+        {"worker_answer": "Fort Smith Museum of History"},
+        {"worker_answer": ""},
+    ]
+    result = _result(triggers)
+    assert result["answer"] == "Fort Smith Museum of History"
+    assert result["answer_source"] == "worker_fallback"
+    assert result["worker_answers"] == ["Fort Smith Museum of History", ""]
+
+
+def test_worker_payload_disables_thinking(monkeypatch):
+    # Without enable_thinking=False the worker writes its reply into `reasoning`
+    # and `content` comes back empty.
+    import io
+    import json
+    import urllib.request
+
+    from dragin_rlm import harness
+
+    sent = {}
+
+    def fake_urlopen(req, timeout):
+        sent.update(json.loads(req.data.decode("utf-8")))
+        body = json.dumps({"choices": [{"message": {"content": "Yes"}}]}).encode()
+        return io.BytesIO(body)
+
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+    answer = harness._call_worker("unused", "query", "passages")
+    assert answer == "Yes"
+    assert sent["chat_template_kwargs"] == {"enable_thinking": False}

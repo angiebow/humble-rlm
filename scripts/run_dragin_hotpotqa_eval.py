@@ -53,7 +53,14 @@ def load_hotpotqa(limit: int = 10) -> list[dict]:
 
 
 def main():
-    out_dir = ROOT / "results"
+    import argparse
+    ap = argparse.ArgumentParser(description="DRAGIN-RLM HotpotQA Evaluation with RIND")
+    ap.add_argument("--limit", type=int, default=150, help="Number of questions to evaluate (default: 150)")
+    ap.add_argument("--out-dir", type=Path, default=ROOT / "results",
+                    help="Where results are written (default: results/). Use a separate dir for smoke tests, since the jsonl is appended to and the csv/summary are overwritten.")
+    args = ap.parse_args()
+
+    out_dir = args.out_dir
     out_dir.mkdir(exist_ok=True)
     out_file = out_dir / "dragin_hotpotqa_eval_results.jsonl"
     csv_file = out_dir / "table_dragin_hotpotqa_eval.csv"
@@ -67,19 +74,8 @@ def main():
     config_path = ROOT / "configs/experiments/dragin_rlm_hotpotqa.yaml"
     cfg = load_config(str(config_path))
 
-    # Create DRAGIN config
-    dcfg = DraginConfig(
-        model_path=cfg.dragin.model_path,
-        worker_model=cfg.models.worker,
-        theta=cfg.dragin.theta,
-        top_n=cfg.dragin.top_n,
-        generate_length=cfg.dragin.generate_length,
-        max_retrieval_seconds=cfg.dragin.max_retrieval_seconds,
-        max_triggers=cfg.dragin.max_triggers,
-        retrieval_top_k=cfg.dragin.retrieval_top_k,
-        passage_chars=cfg.dragin.passage_chars,
-        temperature=cfg.dragin.temperature,
-    )
+    from dragin_rlm.pipeline import dragin_config_from_cfg
+    dcfg = dragin_config_from_cfg(cfg)
 
     print(f"  Model: {dcfg.model_path}")
     print(f"  Theta: {dcfg.theta}")
@@ -92,7 +88,7 @@ def main():
 
     # Load questions
     print("\nLoading HotpotQA questions...")
-    questions = load_hotpotqa(limit=10)
+    questions = load_hotpotqa(limit=args.limit)
     print(f"  ✓ Loaded {len(questions)} questions")
 
     # Run evaluation
@@ -123,6 +119,7 @@ def main():
             "gold_answer": q["gold_answer"],
             "answer": dragin_result.get("answer", ""),
             "answer_source": dragin_result.get("answer_source", ""),
+            "worker_answers": dragin_result.get("worker_answers", []),
 
             # Efficiency metrics
             "latency_s": latency_s,
@@ -226,7 +223,7 @@ TRIGGERING ANALYSIS:
 Questions evaluated: {len(df)}
 Config: {config_path.name}
 Root model: {dcfg.model_path}
-Worker model: {dcfg.worker_model}
+Worker model: mlx-community/Qwen3.5-2B
 """
 
     summary_file = out_dir / "dragin_hotpotqa_eval_summary.txt"

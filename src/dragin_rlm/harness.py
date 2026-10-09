@@ -128,10 +128,12 @@ def _render_prompt(template: str, tokenizer: Any, disable_thinking: bool, prefix
 
 def _call_worker(worker_model: str, query: str, passages: str) -> str:
     import json
+    import os
     import urllib.request
 
-    # Call the local mlx_lm.server directly at localhost:8005 instead of through litellm
-    url = "http://localhost:8005/v1/chat/completions"
+    # Call the local mlx_lm.server directly instead of through litellm. Port 8005
+    # by default; set DRAGIN_WORKER_URL when 8005 is already taken on the host.
+    url = os.environ.get("DRAGIN_WORKER_URL", "http://localhost:8005/v1/chat/completions")
     payload = {
         "model": "mlx-community/Qwen3.5-2B-4bit",
         "messages": [
@@ -144,6 +146,9 @@ def _call_worker(worker_model: str, query: str, passages: str) -> str:
         ],
         "max_tokens": 128,
         "temperature": 0,
+        # Without this the worker's answer goes into `reasoning` and `content`
+        # comes back empty, so every retrieval produced an empty worker answer.
+        "chat_template_kwargs": {"enable_thinking": False},
     }
 
     req = urllib.request.Request(
@@ -215,7 +220,11 @@ def _build_result(
 ) -> Dict[str, Any]:
     """Shared by the final return and every checkpoint call so the two can
     never drift out of sync with each other."""
-    worker_fallback = triggers[-1]["worker_answer"] if triggers else ""
+    # Most recent retrieval that actually produced a worker answer; an empty
+    # worker reply on the last trigger should not hide an earlier good one.
+    worker_fallback = next(
+        (t["worker_answer"] for t in reversed(triggers) if t["worker_answer"]), ""
+    )
     answer, answer_source = _extract_answer(generated_text, worker_fallback)
     return {
         "answer": answer,
@@ -229,6 +238,7 @@ def _build_result(
         "n_retrievals": len(triggers),
         "time_capped": time_capped,
         "rind_triggers": triggers,
+        "worker_answers": [t["worker_answer"] for t in triggers],
         "theta": cfg.theta,
         "top_n": cfg.top_n,
         "max_rind_score": max_rind_score,
