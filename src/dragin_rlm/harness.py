@@ -44,6 +44,7 @@ Per-token decision, explicitly (three outcomes, one check):
 
 from __future__ import annotations
 
+import re
 import time
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, Tuple
@@ -53,6 +54,7 @@ from .attention_probe import generate_with_probe, load_dragin_model
 from .rind import RindState
 
 ANSWER_CUE = "So the answer is"
+_SPECIAL_TOKEN_RE = re.compile(r"<\|[^|>]*\|>")
 
 DIRECT_PROMPT = (
     "Answer the question using the document. Reason step by step, then end your "
@@ -182,6 +184,9 @@ def _extract_answer(text: str, worker_fallback: str = "") -> Tuple[str, str]:
                            read real retrieved passages, which is still
                            better-grounded than an empty string.
     """
+    # Drop chat special tokens such as <|endoftext|> that the tokenizer can emit
+    # as text; otherwise "Yes" comes back as "Yes<|endoftext|>".
+    text = _SPECIAL_TOKEN_RE.sub("", text)
     if ANSWER_CUE in text:
         tail = text.split(ANSWER_CUE, 1)[1]
         extracted = tail.strip(" :\n").split("\n")[0].strip()

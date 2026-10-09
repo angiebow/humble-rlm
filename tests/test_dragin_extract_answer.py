@@ -35,6 +35,13 @@ def test_extract_answer_empty_with_no_fallback_available():
     assert source == "worker_fallback"
 
 
+def test_extract_answer_strips_end_of_text_token():
+    # Real case from the smoke run: the cue answer came back as "Yes<|endoftext|>".
+    answer, source = _extract_answer("So the answer is: Yes<|endoftext|>", worker_fallback="")
+    assert answer == "Yes"
+    assert source == "cue"
+
+
 def _cfg():
     return DraginConfig(model_path="unused", worker_model="unused")
 
