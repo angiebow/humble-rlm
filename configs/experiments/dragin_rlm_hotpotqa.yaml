@@ -8,10 +8,10 @@ models:
 dragin:
   # Root model: loaded directly, no external API
   model_path: "mlx-community/Qwen3.5-35B-A3B-4bit"
-  # theta set above any reachable RIND score (entropy is at most ~ln(vocab) ~ 12,
-  # attention <= 1, semantic flag 0/1), so retrieval never triggers: this run is a
-  # no-retrieval baseline. Earlier values: 0.001 -> 20/20 retrievals, 0.03 -> rarely.
-  theta: 100.0
+  # 0.01 is below the lowest per-question max RIND score seen on HotpotQA (0.010),
+  # so retrieval should trigger on most questions. Earlier: 0.001 -> 20/20 retrievals
+  # on every question (cap hit); 0.03 -> rarely; 100 -> never (no-retrieval baseline).
+  theta: 0.01
   top_n: 25
   generate_length: 768
   max_retrieval_seconds: 600
