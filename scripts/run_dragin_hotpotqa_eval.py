@@ -120,6 +120,7 @@ def main():
             "answer": dragin_result.get("answer", ""),
             "answer_source": dragin_result.get("answer_source", ""),
             "worker_answers": dragin_result.get("worker_answers", []),
+            "retrieval_queries": dragin_result.get("retrieval_queries", []),
 
             # Efficiency metrics
             "latency_s": latency_s,

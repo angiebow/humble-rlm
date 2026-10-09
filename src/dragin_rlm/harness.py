@@ -245,6 +245,7 @@ def _build_result(
         "time_capped": time_capped,
         "rind_triggers": triggers,
         "worker_answers": [t["worker_answer"] for t in triggers],
+        "retrieval_queries": [t["query"] for t in triggers],
         "theta": cfg.theta,
         "top_n": cfg.top_n,
         "max_rind_score": max_rind_score,
