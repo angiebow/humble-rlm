@@ -28,6 +28,7 @@ def dragin_config_from_cfg(cfg: dict) -> DraginConfig:
         passage_chars=d.get("passage_chars", 1000),
         temperature=d.get("temperature", 0.0),
         disable_thinking=d.get("disable_thinking", False),
+        min_prefix_tokens=d.get("min_prefix_tokens", 10),
     )
 
 

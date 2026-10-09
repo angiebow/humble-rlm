@@ -12,6 +12,9 @@ dragin:
   # so retrieval should trigger on most questions. Earlier: 0.001 -> 20/20 retrievals
   # on every question (cap hit); 0.03 -> rarely; 100 -> never (no-retrieval baseline).
   theta: 0.01
+  # Ignore RIND triggers in the first N tokens (no context yet, so the retrieval
+  # query would be near-empty).
+  min_prefix_tokens: 10
   top_n: 25
   generate_length: 768
   max_retrieval_seconds: 600

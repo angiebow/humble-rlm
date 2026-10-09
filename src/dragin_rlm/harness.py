@@ -102,6 +102,7 @@ class DraginConfig:
     retrieval_top_k: int = 3     # passages handed to the worker per trigger
     passage_chars: int = 1000
     temperature: float = 0.0
+    min_prefix_tokens: int = 10  # RIND triggers only count from this token onward
     disable_thinking: bool = False  # render the prompt through the model's chat
                                   # template with enable_thinking=False (the
                                   # empty "<think></think>" block is part of the
@@ -332,7 +333,11 @@ def run_dragin(
                             "max_attn": state.max_attn[idx],
                             "semantic": state.semantic[idx],
                         }
-                    if score > cfg.theta:
+                    # Ignore triggers before min_prefix_tokens: the first few
+                    # tokens have no context, so a retrieval query built from
+                    # them is nearly empty and returns passages that can't
+                    # answer the question.
+                    if score > cfg.theta and idx >= cfg.min_prefix_tokens:
                         triggered_at = idx
                         break
                 if _cue_line_complete(generated_text) or budget <= 0:

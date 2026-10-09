@@ -86,3 +86,12 @@ def test_worker_payload_disables_thinking(monkeypatch):
     answer = harness._call_worker("unused", "query", "passages")
     assert answer == "Yes"
     assert sent["chat_template_kwargs"] == {"enable_thinking": False}
+
+
+def test_min_prefix_tokens_comes_from_config_with_default():
+    from dragin_rlm.pipeline import dragin_config_from_cfg
+
+    base = {"models": {"worker": "w"}, "dragin": {"model_path": "m", "theta": 0.01}}
+    assert dragin_config_from_cfg(base).min_prefix_tokens == 10
+    base["dragin"]["min_prefix_tokens"] = 25
+    assert dragin_config_from_cfg(base).min_prefix_tokens == 25
