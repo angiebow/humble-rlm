@@ -1,0 +1,361 @@
+qid,gold_answer,answer,correct,f1,semantic_similarity,completion_tokens,latency_s,n_retrievals,leaf_calls,max_rind_score,rind_checked_tokens,rind_nonstopword_ratio,answer_source,time_capped
+hotpotqa-000,yes,Yes,True,1.0,1.0,211,2.927455292083323,0,0,0.018190998002834302,210,0.4095238095238095,cue,False
+hotpotqa-001,Chief of Protocol,"United States ambassador to Ghana, United States ambassador to Czechoslovakia, and Chief of Protocol of the United States",True,0.3,0.687741756439209,230,5.0193924168124795,1,1,0.02618893154798485,229,0.5109170305676856,cue,False
+hotpotqa-002,Animorphs,Animorphs,True,1.0,0.9999999403953552,338,4.40826337505132,0,0,0.04742010899767912,337,0.516320474777448,cue,False
+hotpotqa-003,no,No,True,1.0,1.0,171,2.351188125088811,0,0,0.020857251404753363,170,0.48823529411764705,cue,False
+hotpotqa-004,"Greenwich Village, New York City","Greenwich Village, New York City",True,1.0,1.0,220,3.039158041588962,0,0,0.0369709652079413,219,0.4931506849315068,cue,False
+hotpotqa-005,YG Entertainment,YG Entertainment,True,1.0,0.9999999403953552,209,2.9313610838726163,0,0,0.02664090333710778,208,0.41346153846153844,cue,False
+hotpotqa-006,Eenasul Fateh,Eenasul Fateh,True,1.0,1.0,290,4.04412804171443,0,0,0.015547415299430378,289,0.5121107266435986,cue,False
+hotpotqa-007,"3,677 seated","3,677",False,0.6666666666666666,0.8597059845924377,232,4.002725916914642,0,0,0.049299001830058975,231,0.4588744588744589,cue,False
+hotpotqa-008,Terry Richardson,Terry Richardson,True,1.0,1.0000001192092896,130,3.196530000306666,1,1,0.025661966930318414,129,0.34108527131782945,cue,False
+hotpotqa-009,yes,Yes,True,1.0,1.0,186,2.669781249947846,0,0,0.02791990802465305,185,0.41621621621621624,cue,False
+hotpotqa-010,Kansas Song,Kansas Song,True,1.0,1.0000001192092896,284,5.353166708722711,1,1,0.024994643607440192,283,0.43462897526501765,cue,False
+hotpotqa-011,David Weissman,David Weissman,True,1.0,1.0000001192092896,389,4.813162541948259,0,0,0.032755800131995416,388,0.47164948453608246,cue,False
+hotpotqa-012,1999,1999,True,1.0,1.0,280,3.758821750059724,0,0,0.031227824442284113,279,0.44086021505376344,cue,False
+hotpotqa-013,no,Yes,False,0.0,0.7329009771347046,308,4.695903333835304,0,0,0.04084292296993386,307,0.46579804560260585,cue,False
+hotpotqa-014,from 1986 to 2013,1986 to 2013,False,0.8571428571428571,0.9814833998680115,239,3.0767095424234867,0,0,0.028902186883728254,238,0.40336134453781514,cue,False
+hotpotqa-015,"9,984","<think>
+
+</think>
+
+To answer this question, we must follow these steps based on the provided document:
+
+1.  **Identify the location of Brown State Fishing Lake:**
+    The document section titled ""Brown State Fishing Lake"" states: ""Brown State Fishing Lake... is a protected area in Brown County, Kansas in the United States.""
+
+2.  **Identify the country:**
+    The text explicitly places the lake in the ""United States.""
+
+3.  **Find the population of that country:**
+    The document contains a section titled ""Brown County, Kansas."" This section states: ""As of the 2010 census, the county population was 9,984.""
+    *Crucial Observation:* The document provides the population for **Brown County**, not the entire **United States**. The text does not contain the total population figure for the United States.
+
+4.  **Analyze the question's intent vs. the document's data:**
+    The question asks for the population of the *country* (United States). However, the document only provides the population of the *county* (9,984) where the lake is located. In reading comprehension tasks based strictly on provided text, if the specific data for the ""country"" is missing, but data for the ""county"" is present, the question often implies a confusion between the two or expects the user to extract the only available population figure associated with the location mentioned in the text. Since the document does not state the US population, the only population number available in the text related to the location of Brown State Fishing Lake is the population of Brown County.
+
+    *Self-Correction/Refinement:* If the question strictly requires the population of the *country* (USA), the answer is ""not mentioned."" However, in the context of these specific document-based QA tasks, the question usually targets the specific number found in the text associated with the location's administrative division. The text says Brown County has a population of 9,984. It is highly probable the question is testing the ability to find the population figure associated with the location described, even if the phrasing ""country"" is a slight error for ""county"" in the context of the provided text's limitations.
+
+    Let's re-read carefully: ""Brown State Fishing Lake is in a country that has a population of how many inhabitants?""
+    The text says: ""Brown County... As of the 2010 census, the county population was 9,984.""
+    The text does *not* give the US population.
+    However, if we assume the question is asking for the population figure *available in the document* for the location of the lake (which is Brown County, Kansas, USA), the answer is 9,984. If the question is a trick and the answer is ""unknown,"" that is less likely for this format. The most logical extraction from the text is the number 9,984, assuming the question meant ""county"" or expects the user to use the only available population statistic for that region.
+
+    Let's look at the phrasing again. ""Brown State Fishing Lake is in a country..."" -> United States. The document does not list the US population. It lists the Brown County population.
+    Is it possible the question implies the population of the *county*? Yes.
+    Is it possible the answer is ""not mentioned""? Yes.
+    However, standard procedure for these specific ""Answer using the document"" prompts is to extract the number present in the text that corresponds to the location's administrative unit. The text explicitly links Brown County to the population 9,984",True,0.00449438202247191,0.5205004215240479,768,9.11304754205048,0,0,0.03462655416655025,767,0.41851368970013036,raw_reasoning,False
+hotpotqa-016,the North Atlantic Conference,North Atlantic Conference,True,1.0,0.9746165871620178,204,2.884113167412579,0,0,0.02066571250400928,203,0.39408866995073893,cue,False
+hotpotqa-017,yes,Yes,True,1.0,1.0,230,3.148416499607265,0,0,0.031016302661527106,229,0.4759825327510917,cue,False
+hotpotqa-018,1969 until 1974,1969-1974,False,0.0,0.9478179216384888,210,3.119109332561493,0,0,0.027204505779412358,209,0.35406698564593303,cue,False
+hotpotqa-019,Robert Erskine Childers DSC,Robert Erskine Childers,False,0.8571428571428571,0.9490993022918701,149,2.106091749854386,0,0,0.027046526125475978,148,0.4594594594594595,cue,False
+hotpotqa-020,Pedro Rodríguez,Pedro Rodríguez,True,1.0,1.0000001192092896,349,4.3925696248188615,0,0,0.03258962017016387,348,0.3793103448275862,cue,False
+hotpotqa-021,Sonic,"<think>
+
+</think>
+
+To answer this question, we need to identify the singer of the song ""A Rather Blustery Day"" and then determine which hedgehog character that same person voiced, based on the provided text.
+
+1.  **Identify the singer of ""A Rather Blustery Day"":**
+    Looking at the section titled ""A Rather Blustery Day,"" the text states: ""It was written by Robert & Richard Sherman and sung by **Jim Cummings** as 'Pooh'.""
+
+2.  **Identify the hedgehog character voiced by Jim Cummings:**
+    Looking at the section titled ""Jim Cummings,"" the text lists his roles. It mentions he is known for voicing ""Dr. Robotnik from **'Sonic the Hedgehog'**."" Additionally, the section on ""Kate Higgins"" mentions she voiced ""Miles 'Tails' Prower in the video game series 'Sonic the Hedgehog',"" but the question asks about the singer of ""A Rather Blustery Day"" (Jim Cummings). The text explicitly links Jim Cummings to the character Dr. Robotnik from ""Sonic the Hedgehog"". While Sonic himself is a hedgehog, the text specifies Jim Cummings voiced Dr. Robotnik *from* ""Sonic the Hedgehog"". However, looking closer at the phrasing ""voiced what hedgehog"", the text says Jim Cummings voiced ""Dr. Robotnik from 'Sonic the Hedgehog'"". Wait, let me re-read carefully.
+    
+    The text says: ""He is known for voicing the title character from 'Darkwing Duck', Dr. Robotnik from 'Sonic the Hedgehog', and Pete.""
+    It does not explicitly state he voiced Sonic the Hedgehog in this specific text snippet, but it mentions he voiced Dr. Robotnik *from* the series.
+    
+    Let's re-read the Kate Higgins section: ""In 2010, she voiced Miles 'Tails' Prower in the video game series 'Sonic the Hedgehog'.""
+    
+    Let's re-read the Jim Cummings section again. ""He is known for voicing the title character from 'Darkwing Duck', Dr. Robotnik from 'Sonic the Hedgehog', and Pete.""
+    
+    Is there a mistake in my interpretation? The question asks ""This singer of A Rather Blustery Day also voiced what hedgehog?""
+    The singer is Jim Cummings.
+    The text says Jim Cummings voiced ""Dr. Robotnik from 'Sonic the Hedgehog'"".
+    Dr. Robotnik is a hedgehog? No, Dr. Robotnik (Eggman) is a human. Sonic is the hedgehog.
+    
+    Let's look for another mention.
+    ""He has performed in numerous Disney and DreamWorks animations... He has also provided voice-over work for video games... 'Mass Effect 2'...""
+    
+    Perhaps the question implies the *series* name? Or maybe I missed a line.
+    ""He is known for voicing the title character from 'Darkwing Duck', Dr. Robotnik from 'Sonic the Hedgehog'...""
+    
+    Wait, in the real world, Jim Cummings *did* voice Sonic the Hedgehog in some games (like *Sonic Heroes* or *Sonic the Hedgehog* 2006? No, usually Sonic is voiced by others, but Cummings voiced *Sonic* in some specific titles or perhaps the question assumes the connection to the franchise).
+    
+    However, strictly using the **document provided**:
+    The document says Jim Cummings voiced ""Dr. Robotnik from 'Sonic the Hedgehog'"".
+    It does not explicitly say he voiced",True,0.0048543689320388345,0.6112978458404541,768,9.073932833969593,0,0,0.024487862450189413,767,0.49022164276401564,raw_reasoning,False
+hotpotqa-022,keyboard function keys,the keyboard function keys,True,1.0,0.975227415561676,195,2.960668332874775,0,0,0.013910458442305651,194,0.4536082474226804,cue,False
+hotpotqa-023,Badly Drawn Boy,Badly Drawn Boy,True,1.0,1.0,520,7.326965791173279,1,1,0.02209825796899345,519,0.42003853564547206,cue,False
+hotpotqa-024,World's Best Goalkeeper,IFFHS World's Best Goalkeeper,True,0.8571428571428571,0.9143094420433044,232,3.1209566248580813,0,0,0.018608229953865685,231,0.43722943722943725,cue,False
+hotpotqa-025,Barton Lee Hazlewood,Lee Hazlewood,False,0.8,0.8802354335784912,413,5.014340333640575,0,0,0.02741945753679098,412,0.35194174757281554,cue,False
+hotpotqa-026,1838,1838,True,1.0,1.0,283,5.610320041887462,1,1,0.039177221405157336,282,0.450354609929078,cue,False
+hotpotqa-027,yes,Yes,True,1.0,1.0,196,2.3299642922356725,0,0,0.05045719828288009,195,0.5128205128205128,cue,False
+hotpotqa-028,Henry J. Kaiser,Yes,False,0.0,0.4769982695579529,191,2.674452167004347,0,0,0.02315306136301487,190,0.48947368421052634,cue,False
+hotpotqa-029,Arena of Khazan,Arena of Khazan,True,1.0,1.0000001192092896,258,3.3796069165691733,0,0,0.049689786238353406,257,0.45525291828793774,cue,False
+hotpotqa-030,2000,2000,True,1.0,1.0,386,6.324391334317625,1,1,0.02920144176407069,385,0.36103896103896105,cue,False
+hotpotqa-031,"Fujioka, Gunma","Japan (Fujioka, Gunma)",True,0.8,0.8897574543952942,245,3.231865500099957,0,0,0.0280307663439201,244,0.5,cue,False
+hotpotqa-032,Charles Eugène,Charles Nungesser,False,0.5,0.5973774790763855,326,4.155812792479992,0,0,0.06674472814420351,325,0.48307692307692307,cue,False
+hotpotqa-033,no,No,True,1.0,1.0,291,3.9753440422937274,0,0,0.025171828877770253,290,0.41379310344827586,cue,False
+hotpotqa-034,Letters to Cleo,Letters to Cleo,True,1.0,1.0000001192092896,337,4.356768707744777,0,0,0.01888673997017154,336,0.4851190476190476,cue,False
+hotpotqa-035,October 1922,1922,False,0.6666666666666666,0.8923790454864502,508,8.097350708208978,1,1,0.024880854701658572,507,0.3747534516765286,cue,False
+hotpotqa-036,2000,2000,True,1.0,1.0,190,2.698797999881208,0,0,0.02691363791863388,189,0.42328042328042326,cue,False
+hotpotqa-037,World War II,World War II,True,1.0,1.0,236,3.0541822090744972,0,0,0.014607867198371594,235,0.4978723404255319,cue,False
+hotpotqa-038,no,No,True,1.0,1.0,172,2.5716451657935977,0,0,0.046694372737283274,171,0.47368421052631576,cue,False
+hotpotqa-039,New York City,New York City,True,1.0,1.000000238418579,244,4.515489750541747,1,1,0.03733542574218429,243,0.448559670781893,cue,False
+hotpotqa-040,Scotch Collie,the Scotch Collie,True,1.0,0.9629676342010498,196,2.950064040720463,0,0,0.026762082247030916,195,0.5076923076923077,cue,False
+hotpotqa-041,Mumbai,"Mumbai, Maharashtra",True,0.6666666666666666,0.9502257108688354,191,2.6594977090135217,0,0,0.038479399802769265,190,0.46842105263157896,cue,False
+hotpotqa-042,1962,1962,True,1.0,1.0,222,3.275994542054832,0,0,0.03211012750192754,221,0.4434389140271493,cue,False
+hotpotqa-043,sovereignty,Ethiopian sovereignty,True,0.6666666666666666,0.7969022989273071,221,3.3408957086503506,0,0,0.028916117745879433,220,0.4909090909090909,cue,False
+hotpotqa-044,Nelson Rockefeller,Nelson Rockefeller,True,1.0,1.0,211,3.620881292037666,0,0,0.02060709894447399,210,0.4523809523809524,cue,False
+hotpotqa-045,Yellowcraig,Yellowcraigs,False,0.0,0.9465768337249756,256,3.3261954160407186,0,0,0.024915123816892537,255,0.5254901960784314,cue,False
+hotpotqa-046,Phil Spector,Phil Spector,True,1.0,1.0,225,3.6591583751142025,0,0,0.035354177594175695,224,0.40625,cue,False
+hotpotqa-047,Organizations could come together to address global issues,World Summit of Nobel Peace Laureates,False,0.0,0.6359043717384338,313,4.442931958474219,0,0,0.01860423657192989,312,0.47435897435897434,cue,False
+hotpotqa-048,yes,Yes,True,1.0,1.0,235,3.2500898325815797,0,0,0.020691575478930968,234,0.4700854700854701,cue,False
+hotpotqa-049,English Electric Canberra,"<think>
+
+</think>
+
+To answer this question, we must analyze the provided text to identify a specific aircraft that meets three criteria: it must be a British first-generation jet-powered medium bomber, and it must have been used in the South West Pacific theatre of World War II.
+
+1.  **Identify British first-generation jet-powered medium bombers:**
+    *   The document section on the **English Electric Canberra** describes it as a ""British first-generation jet-powered medium bomber that was manufactured during the 1950s.""
+    *   The document section on the **Tupolev Tu-12** describes it as an ""experimental Soviet jet-powered medium bomber,"" so it is not British.
+    *   The **Savoia-Marchetti SM.79** is described as an ""Italian medium bomber,"" so it is not British.
+
+2.  **Check the operational history of the English Electric Canberra:**
+    *   The text states the Canberra was developed in the mid-to-late 1940s and introduced to service in May 1951.
+    *   The text regarding **No. 2 Squadron RAAF** states: ""It saw action as a bomber unit in the South West Pacific theatre of World War II and, equipped with English Electric Canberra jets, in the Malayan Emergency and the Vietnam War.""
+    *   The text regarding **No. 12 Squadron RAAF** states it ""saw combat in the South West Pacific theatre of World War II"" but does not specify the aircraft type used during that specific period, only that it later operated as a heavy bomber unit.
+
+3.  **Evaluate the timeline discrepancy:**
+    *   World War II ended in 1945.
+    *   The English Electric Canberra was introduced to service in 1951.
+    *   Therefore, the Canberra could not have been used in the South West Pacific theatre *during* World War II.
+    *   However, the text explicitly links the **No. 2 Squadron RAAF** to the South West Pacific theatre of World War II and separately states that this same squadron was later ""equipped with English Electric Canberra jets"" for the Malayan Emergency and Vietnam War.
+    *   The question asks which British first-generation jet-powered medium bomber was used in the South West Pacific theatre of World War II. Based strictly on the provided text, there is no British jet bomber mentioned as being used *during* World War II (since jets like the Canberra didn't exist or enter service until after the war).
+    *   *Correction/Refinement based on the text's phrasing:* The text says No. 2 Squadron ""saw action as a bomber unit in the South West Pacific theatre of World War II"" and *then* ""equipped with English Electric Canberra jets, in the Malayan Emergency and the Vietnam War."" The text does not claim the Canberra was used in WWII.
+    *   However, looking at the question again, it asks ""Which British first-generation jet-powered medium bomber was used in the South West Pacific theatre of World War II?""
+    *   If we look strictly at the text, the answer is **none**. The Canberra was used in the South West Pacific theatre, but in the *Malayan Emergency and the Vietnam War*, not World War II.
+    *   *Wait, let's re-read the prompt's implied logic.* Often, these questions are generated based on the association of entities in the text. The text links ""No. 2 Squadron"" to ""South West Pacific theatre of World War II"" and ""English Electric Canberra"" to ""No. 2 Squadron"". It is",True,0.012958963282937363,0.6670260429382324,768,10.625018334016204,1,1,0.029439523286300062,767,0.4589308996088657,raw_reasoning,False
+hotpotqa-050,2009 Big 12 Conference,"2009, Big 12 Conference",True,1.0,0.9901295304298401,419,6.6329898331314325,1,1,0.04847389904924526,418,0.27751196172248804,cue,False
+hotpotqa-051,"1,462","1,462",True,1.0,1.0,231,4.582863375544548,1,1,0.04000590296749795,230,0.3391304347826087,cue,False
+hotpotqa-052,Indianapolis Motor Speedway,Indianapolis Motor Speedway,True,1.0,1.0000001192092896,501,6.10554379131645,0,0,0.0451602100139783,500,0.366,cue,False
+hotpotqa-053,Rome,Rome,True,1.0,1.0,286,3.7687431667000055,0,0,0.027996448154765652,285,0.4666666666666667,cue,False
+hotpotqa-054,"Max Martin, Savan Kotecha and Ilya Salmanzadeh","Max Martin, Savan Kotecha, Ilya Salmanzadeh, Tove Lo, and Ali Payami",False,0.7777777777777778,0.9248394966125488,470,5.751274541951716,0,0,0.049070889136189066,469,0.4584221748400853,cue,False
+hotpotqa-055,"Marion, South Australia",Marion,False,0.5,0.8582490086555481,507,9.602068208158016,2,2,0.024241330072829914,506,0.39723320158102765,cue,False
+hotpotqa-056,Drifting,drifting,True,1.0,1.0000001192092896,222,3.0458352072164416,0,0,0.027645742739821344,221,0.45248868778280543,cue,False
+hotpotqa-057,Keith Bostic,Keith Bostic,True,1.0,1.000000238418579,215,3.0495058335363865,0,0,0.021765425657988002,214,0.4252336448598131,cue,False
+hotpotqa-058,"35,124","35,124",True,1.0,1.0,235,3.242990165948868,0,0,0.04717694612359491,234,0.32905982905982906,cue,False
+hotpotqa-059,no,"<think>
+
+</think>
+
+To determine if both Cypress and Ajuga are genera, we must analyze the definitions provided in the document for each term.
+
+1.  **Analyze ""Ajuga"":** The document explicitly states, ""Ajuga... is a **genus** of 40 species annual and perennial herbaceous flowering plants in the mint family Lamiaceae."" This confirms that Ajuga is a genus.
+2.  **Analyze ""Cypress"":** The document states, ""Cypress is a conifer tree or shrub... that belongs to the family Cupressaceae."" It further clarifies in the section for ""Cupressus"" that ""The genus Cupressus is one of several genera within the family Cupressaceae that have the common name cypress."" This indicates that ""Cypress"" is a common name used for several different genera (including *Cupressus*, *Fokienia*, *Libocedrus*, etc.), rather than being the specific name of a single genus itself. However, the question asks if they are ""genera"" in the context of biological classification. While ""Cypress"" is a common name, the text explains that it refers to multiple genera. More importantly, the text for ""Ajuga"" explicitly labels it a ""genus,"" whereas the text for ""Cypress"" describes it as a ""tree or shrub"" and notes that the word is a common name for several genera.
+3.  **Refine the distinction:** The question asks ""Are both Cypress and Ajuga genera?""
+    *   **Ajuga** is explicitly defined as a genus.
+    *   **Cypress** is defined as a common name for trees/shrubs belonging to the family Cupressaceae. The text says ""The genus Cupressus is one of several genera... that have the common name cypress."" Therefore, ""Cypress"" itself is not the name of a specific genus; it is a common name covering multiple genera. The specific genus names are *Cupressus*, *Fokienia*, *Libocedrus*, etc.
+
+However, in common parlance and within the context of the document's structure, ""Cypress"" is often treated as the name of the group, but strictly speaking, the document distinguishes ""Cypress"" (the common name for the tree) from ""Cupressus"" (the specific genus). The document states ""Cypress is a conifer tree or shrub,"" not ""Cypress is a genus."" In contrast, it states ""Ajuga... is a genus.""
+
+Therefore, strictly based on the text:
+*   Ajuga = Genus.
+*   Cypress = Common name for trees/shrubs (which belong to several genera, but ""Cypress"" is not the name of a single genus).
+
+Wait, let's re-read the ""Cypress"" section carefully. ""Cypress is a conifer tree or shrub... that belongs to the family Cupressaceae."" It does not say ""Cypress is a genus."" It says ""The genus Cupressus is one of several genera... that have the common name cypress.""
+So, ""Ajuga"" is a genus. ""Cypress"" is a common name for trees, not the name of a specific genus (though it refers to members of several genera).
+
+However, the question might be interpreted as ""Are both terms used to refer to genera?""
+*   Ajuga refers to a specific genus.
+*   Cypress refers to a group of genera (common name).
+
+If the question implies ""Is 'Cypress' the name of a genus?"", the answer is no, it is a common",True,0.004830917874396135,0.3799213171005249,768,8.79240870848298,0,0,0.02635324300391817,767,0.47196870925684486,raw_reasoning,False
+hotpotqa-060,shortest player ever to play in the National Basketball Association,The shortest player ever to play in the NBA,False,0.75,0.9671922922134399,308,4.23902149964124,0,0,0.049629870953102895,307,0.4723127035830619,cue,False
+hotpotqa-061,Ronald Shusett,"<think>
+
+</think>
+
+To answer this question, we must identify the films mentioned in the document that have a score composed by Jerry Goldsmith and then determine if any of those films list an executive producer.
+
+1.  **Christus Apollo**: Composed by Jerry Goldsmith. No executive producer is mentioned (it is a cantata, not a film).
+2.  **Alien (soundtrack)**: Composed by Jerry Goldsmith. The document mentions producers Gordon Carroll, David Giler, and Walter Hill, and executive producer Shusett (Ronald Shusett).
+3.  **L.A. Confidential (soundtrack)**: Composed by Jerry Goldsmith. No executive producer is mentioned in the text.
+4.  **Innerspace**: Music composed by Jerry Goldsmith. The text states: ""Steven Spielberg served as executive producer.""
+5.  **Aliens (soundtrack)**: Score composed by James Horner (references Goldsmith's work, but not composed by him).
+6.  **Mulan (soundtrack)**: Score composed by Jerry Goldsmith. No executive producer is mentioned.
+7.  **Alien (film)**: The text mentions ""Shusett was executive producer"" (referring to Ronald Shusett).
+8.  **Legend (film score)**: Composed by Jerry Goldsmith. No executive producer is mentioned.
+9.  **Total Recall (1990 film)**: Score composed by Jerry Goldsmith. No executive producer is mentioned.
+10. **Lionheart (1987 film)**: Score composed by Jerry Goldsmith. The text states: ""Shire's brother, Francis Ford Coppola, initially planned to direct the film but instead opted to be executive producer along with Shire's husband, Jack Schwartzman.""
+
+The document explicitly names executive producers for three films with scores by Jerry Goldsmith:
+*   **Innerspace**: Steven Spielberg.
+*   **Alien**: Ronald Shusett.
+*   **Lionheart**: Francis Ford Coppola and Jack Schwartzman.
+
+The question asks for ""the name of the executive producer"" (singular). Looking at the phrasing of the document for *Innerspace*, it explicitly states ""Steven Spielberg served as executive producer."" For *Alien*, it says ""Shusett was executive producer."" For *Lionheart*, it lists two.
+
+However, often in these types of reading comprehension tasks, if there is a specific film where the role is highlighted as a singular, primary figure or if the question implies a specific instance found in the text, we look for the most direct match. The text for *Innerspace* says: ""Steven Spielberg served as executive producer."" The text for *Alien* says: ""Shusett was executive producer."" The text for *Lionheart* says: ""Francis Ford Coppola... opted to be executive producer along with Shire's husband, Jack Schwartzman.""
+
+Since the question asks for ""the name"" and there are multiple films, any of these names could be correct based on the text. However, **Steven Spielberg** is a very prominent executive producer mentioned in the context of *Innerspace*, which is a film with a score by Jerry Goldsmith. Similarly, **Ronald Shusett** is the executive producer for *Alien*.
+
+Let's re-read the specific constraints. The question asks ""What is the name of the executive producer of the film that has a score composed by Jerry Goldsmith?"" Since multiple films fit the criteria, and multiple executive producers are named, the answer could be any of them. However, usually, if a question is phrased this",True,0.009153318077803202,0.4681873619556427,768,8.969814917072654,0,0,0.04635372075253841,767,0.4954367666232073,raw_reasoning,False
+hotpotqa-062,Adeline Virginia Woolf,Virginia Woolf,False,0.8,0.904510498046875,185,2.5672975424677134,0,0,0.03059407412860682,184,0.375,cue,False
+hotpotqa-063,821,821,True,1.0,1.0,232,4.806957167573273,2,2,0.04732219780045188,231,0.3939393939393939,cue,False
+hotpotqa-064,more than 70 countries,70,False,0.4,0.7058278322219849,212,3.9955523749813437,1,1,0.022946698286396172,211,0.3933649289099526,cue,False
+hotpotqa-065,Charmed,Charmed,True,1.0,0.9999998807907104,252,3.43084854260087,0,0,0.017873689235947676,251,0.49800796812749004,cue,False
+hotpotqa-066,International Boxing Hall of Fame,International Boxing Hall of Fame,True,1.0,1.0,187,3.0473980410024524,0,0,0.017784183367162143,186,0.46236559139784944,cue,False
+hotpotqa-067,Usher,Usher,True,1.0,1.0000001192092896,368,6.780885292217135,1,1,0.022607314598887873,367,0.40599455040871935,cue,False
+hotpotqa-068,Bill Murray,Bill Murray,True,1.0,1.0,245,3.2924971655011177,0,0,0.027143242079909147,244,0.45081967213114754,cue,False
+hotpotqa-069,Carabao Cup,Carabao Cup,True,1.0,1.0000001192092896,211,4.29607866704464,1,1,0.04743336134955811,210,0.4142857142857143,cue,False
+hotpotqa-070,Teen Titans Go!,"<think>
+
+</think>
+
+To answer this question, we need to identify which of Tara Strong's voice roles in animated series fits the specific description provided in the prompt.
+
+1.  **Identify Tara Strong's roles:** According to the document sections titled ""Tara Strong"" and ""Tara Strong filmography,"" her major voice roles in animated series include ""Rugrats"", ""The Powerpuff Girls"", ""The Fairly OddParents"", ""Drawn Together"", ""Teen Titans"", and the spin-off series ""Teen Titans Go!"".
+
+2.  **Analyze the description in the question:** The question asks for the role that is ""an American animated television series based on the DC Comics fictional superhero team, the 'Teen Titans'"".
+
+3.  **Cross-reference the roles with the description:**
+    *   The document section ""List of Teen Titans Go! episodes"" states: ""'Teen Titans Go!' is an American animated television series based on the DC Comics fictional superhero team, the 'Teen Titans'.""
+    *   The document section ""List of Teen Titans episodes"" states: ""'Teen Titans' is an American animated television series based on the DC comics series of the same name...""
+    *   Both ""Teen Titans"" and ""Teen Titans Go!"" fit the general description. However, the question specifically asks for the role that is an American animated television series based on the DC Comics fictional superhero team, the ""Teen Titans"".
+    *   Looking closely at the phrasing, the document explicitly defines ""Teen Titans Go!"" as ""an American animated television series based on the DC Comics fictional superhero team, the 'Teen Titans'."" It also defines the original ""Teen Titans"" series similarly.
+    *   However, the question asks ""Which of Tara Strong major voice role... is an American animated television series..."". The text lists ""Teen Titans"" and ""Teen Titans Go!"" as her roles.
+    *   Let's look at the specific wording in the ""List of Teen Titans Go! episodes"" section: ""Teen Titans Go! is an American animated television series based on the DC Comics fictional superhero team, the 'Teen Titans'.""
+    *   Let's look at the ""List of Teen Titans episodes"" section: ""Teen Titans is an American animated television series based on the DC comics series of the same name...""
+    *   The question phrasing ""based on the DC Comics fictional superhero team, the 'Teen Titans'"" matches the description of **Teen Titans Go!** almost verbatim in the first paragraph of the document. The description for the original series says it is ""based on the DC comics series of the same name"".
+    *   Furthermore, the question asks for the role that *is* the series. Tara Strong voices characters in both. However, the specific definition ""based on the DC Comics fictional superhero team, the 'Teen Titans'"" is the exact opening sentence of the ""Teen Titans Go!"" section in the provided text.
+
+    *   Wait, let's re-read carefully.
+    *   Text 1: ""Teen Titans Go!"" is an American animated television series based on the DC Comics fictional superhero team, the ""Teen Titans"".
+    *   Text 2: ""Teen Titans"" is an American animated television series based on the DC comics series of the same name...
+    *   The question asks: ""Which of Tara Strong major voice role in animated series is an American animated television series based on the DC Comics fictional superhero team, the 'Teen Titans'?""
+    *   The phrase ""based on the DC Comics fictional superhero team, the 'Teen Titans'"" is the exact definition used for **Teen Titans Go!** in the first paragraph. While the original series is also based on",True,0.013071895424836602,0.7102822661399841,768,8.98265912476927,0,0,0.04731469641477126,767,0.4980443285528031,raw_reasoning,False
+hotpotqa-071,"276,170 inhabitants","276,170",False,0.6666666666666666,0.8771005868911743,234,4.3847085842862725,1,1,0.05897146232474171,233,0.3261802575107296,cue,False
+hotpotqa-072,orange,orange,True,1.0,1.0000001192092896,209,2.946934917010367,0,0,0.034309231966621834,208,0.46153846153846156,cue,False
+hotpotqa-073,Tromeo and Juliet,Tromeo and Juliet,True,1.0,1.0,281,3.7992302076891065,0,0,0.02449078959846318,280,0.45357142857142857,cue,False
+hotpotqa-074,William Jefferson Clinton,Bill Clinton,False,0.4,0.8183977603912354,187,2.5368376253172755,0,0,0.022655017628265384,186,0.510752688172043,cue,False
+hotpotqa-075,John John Florence,John John Florence,True,1.0,1.0,373,4.4673634162172675,0,0,0.031644437348822496,372,0.46774193548387094,cue,False
+hotpotqa-076,Ann,Ann,True,1.0,1.0,200,2.694241125136614,0,0,0.03417278859328032,199,0.4723618090452261,cue,False
+hotpotqa-077,Apalachees,Ais,False,0.0,0.5465973615646362,190,2.7929009161889553,0,0,0.0247964999159076,189,0.4444444444444444,cue,False
+hotpotqa-078,British,British,True,1.0,1.000000238418579,111,1.8790114177390933,0,0,0.02630031974351632,110,0.4909090909090909,cue,False
+hotpotqa-079,1865,1865,True,1.0,1.0,181,2.5128827914595604,0,0,0.05232071746155942,180,0.3388888888888889,cue,False
+hotpotqa-080,Newport,Newport,True,1.0,1.0000001192092896,164,2.40883154142648,0,0,0.023455374241505567,163,0.5214723926380368,cue,False
+hotpotqa-081,Bob Seger,Bob Seger,True,1.0,1.0000001192092896,261,6.103990625590086,2,2,0.03878852898133145,260,0.41923076923076924,cue,False
+hotpotqa-082,Conscription,the draft (or conscription),True,0.5,0.8946566581726074,229,5.035415957681835,1,1,0.019704472815024632,228,0.4692982456140351,cue,False
+hotpotqa-083,"Mondelez International, Inc.",Mondelez International,False,0.8,0.9646812677383423,183,2.5537814581766725,0,0,0.019435803407485963,182,0.521978021978022,cue,False
+hotpotqa-084,Monica Lewinsky,Monica Lewinsky,True,1.0,1.0,314,4.219797874800861,0,0,0.026554415207552307,313,0.536741214057508,cue,False
+hotpotqa-085,"April 1, 1949","April 1, 1949",True,1.0,1.0000001192092896,299,4.034133708104491,0,0,0.02990829797488992,298,0.42953020134228187,cue,False
+hotpotqa-086,1866,1866,True,1.0,0.9999998807907104,191,3.758239082992077,1,1,0.0385246784257367,190,0.43157894736842106,cue,False
+hotpotqa-087,"Canary Islands, Spain","La Gomera and Tenerife, Canary Islands, Spain",True,0.6,0.8266620635986328,310,3.9147540405392647,0,0,0.04587321800345201,309,0.4627831715210356,cue,False
+hotpotqa-088,250 million,not mentioned in the document,False,0.0,0.48739728331565857,270,3.3737970422953367,0,0,0.025790998783000063,269,0.45353159851301117,cue,False
+hotpotqa-089,director,director,True,1.0,1.0000001192092896,188,2.471250584349036,0,0,0.023609641508450352,187,0.45454545454545453,cue,False
+hotpotqa-090,The Conversation,The Conversation,True,1.0,1.000000238418579,195,2.663303124718368,0,0,0.03134257560814202,194,0.4381443298969072,cue,False
+hotpotqa-091,John Waters,John Waters,True,1.0,1.0,232,2.9580695424228907,0,0,0.03981259739970833,231,0.39826839826839827,cue,False
+hotpotqa-092,Las Vegas Strip in Paradise,"Las Vegas Strip in Paradise, Nevada",True,0.9090909090909091,0.9805855751037598,207,2.656472417525947,0,0,0.03954822509870448,206,0.44660194174757284,cue,False
+hotpotqa-093,no,No,True,1.0,1.0,219,4.069784916937351,1,1,0.034076071466627056,218,0.4724770642201835,cue,False
+hotpotqa-094,March and April,March and April,True,1.0,0.9999998211860657,198,2.6609218744561076,0,0,0.05174355477324433,197,0.4467005076142132,cue,False
+hotpotqa-095,Fairfax County,Fairfax County,True,1.0,0.9999999403953552,251,4.697075625881553,1,1,0.03157019008394557,250,0.532,cue,False
+hotpotqa-096,IT products and services,"IT products and services (including storage systems, servers, workstations, and data/voice communications equipment)",True,0.47058823529411764,0.8868201971054077,190,4.29599233251065,1,1,0.0228672168525903,189,0.5185185185185185,cue,False
+hotpotqa-097,Levni Yilmaz,Lev Yilmaz,False,0.5,0.914948582649231,251,3.662355207838118,0,0,0.022631071076415932,250,0.504,cue,False
+hotpotqa-098,Beijing,Beijing,True,1.0,1.0,231,3.083811040967703,0,0,0.05117177906756609,230,0.4956521739130435,cue,False
+hotpotqa-099,no,No,True,1.0,1.0,232,3.8099213326349854,1,1,0.037582197698560194,231,0.47186147186147187,cue,False
+hotpotqa-100,"Coahuila, Mexico","Coahuila, Mexico (specifically El Nacimiento) and Oklahoma/Florida",True,0.4444444444444445,0.8498744368553162,388,6.1680067498236895,1,1,0.023290369683818923,387,0.5271317829457365,cue,False
+hotpotqa-101,Larnelle Harris,Larnelle Harris,True,1.0,1.0,366,4.711692375130951,0,0,0.0393015276012032,365,0.4767123287671233,cue,False
+hotpotqa-102,2003,2003,True,1.0,0.9999999403953552,382,5.254766791127622,0,0,0.03756965874145468,381,0.38320209973753283,cue,False
+hotpotqa-103,North Avenue at Techwood Drive,"Atlanta, Georgia",False,0.0,0.5500071048736572,232,3.207922166213393,0,0,0.06817703221893456,231,0.45021645021645024,cue,False
+hotpotqa-104,Leo Varadkar,Leo Varadkar,True,1.0,1.0,263,3.645101709291339,0,0,0.039996236744515024,262,0.44274809160305345,cue,False
+hotpotqa-105,George Raft,George Raft,True,1.0,1.0000001192092896,287,3.8092664582654834,0,0,0.0410513272056785,286,0.43356643356643354,cue,False
+hotpotqa-106,1887,1887,True,1.0,1.0,245,4.759073999710381,1,1,0.03983978834170898,244,0.3729508196721312,cue,False
+hotpotqa-107,business,investing,False,0.0,0.6437562108039856,274,4.711567458696663,1,1,0.020316591622492775,273,0.4432234432234432,cue,False
+hotpotqa-108,7 October 1978,7 October 1978,True,1.0,1.000000238418579,346,6.170224499888718,1,1,0.033342573625660954,345,0.46956521739130436,cue,False
+hotpotqa-109,B-17 Flying Fortress bomber,B-17 Flying Fortress,False,0.8571428571428571,0.9465807676315308,216,2.8383068749681115,0,0,0.02503901781196527,215,0.4558139534883721,cue,False
+hotpotqa-110,Blake Shelton,Blake Shelton,True,1.0,1.0000001192092896,201,2.9247864577919245,0,0,0.05361047656078366,200,0.43,cue,False
+hotpotqa-111,three centuries,three centuries,True,1.0,1.0000001192092896,340,4.3241698341444135,0,0,0.016941294463346246,339,0.49557522123893805,cue,False
+hotpotqa-112,7 January 1936,7 January 1936,True,1.0,1.0000001192092896,184,4.018172750249505,1,1,0.03426682508460033,183,0.3989071038251366,cue,False
+hotpotqa-113,George Archainbaud,George Archainbaud,True,1.0,1.0000001192092896,210,2.807023709639907,0,0,0.022994627279922075,209,0.3492822966507177,cue,False
+hotpotqa-114,picric acid,Picric acid,True,1.0,1.0,243,3.1988367503508925,0,0,0.07529829752693118,242,0.49173553719008267,cue,False
+hotpotqa-115,230,more than 230,True,0.5,0.8837988376617432,179,2.5808582082390785,0,0,0.028021533303502544,178,0.42134831460674155,cue,False
+hotpotqa-116,Marvel,Marvel,True,1.0,1.0,133,2.0192087925970554,0,0,0.02590932730279394,132,0.4015151515151515,cue,False
+hotpotqa-117,United States Senator,United States Senator,True,1.0,1.0,685,9.61383599974215,1,1,0.034908625126353066,684,0.4239766081871345,cue,False
+hotpotqa-118,no,No,True,1.0,1.0,246,3.214112291112542,0,0,0.047412716995238746,245,0.37142857142857144,cue,False
+hotpotqa-119,yes,Yes,True,1.0,1.0,229,3.0646379170939326,0,0,0.01961349977219129,228,0.47368421052631576,cue,False
+hotpotqa-120,The A41,"<think>
+
+</think>
+
+To determine the major truck road located in Backford Cross, we can analyze the provided text step by step:
+
+1.  **Locate ""Backford Cross"" in the text:** The document contains a section titled ""Backford Cross."" It states that Backford Cross is ""located around the A41/A5117 junction.""
+2.  **Identify the roads mentioned:** The text explicitly mentions the A41 and the A5117 in relation to Backford Cross.
+3.  **Determine which road is a ""major truck road"":**
+    *   The section on the **A5117 road** describes it as a road in Cheshire that connects to the M56 and A55, but does not explicitly label it as a ""major truck road"" in the same way the other sections do.
+    *   The section on the **A41 road** describes it as a ""major trunk road in England that links London and Birkenhead.""
+    *   The section on **Param, Rampur** mentions the ""Grand Truck Road,"" but that is in India, not Backford Cross.
+    *   The section on **Pureland Industrial Complex** mentions ""major truck routes"" but refers to US highways.
+    *   Looking closely at the **A41** section, it lists towns it passes through, including ""Chester and Ellesmere Port."" Backford Cross is a suburb of Ellesmere Port.
+    *   However, let's re-read the **Backford Cross** section carefully. It says: ""Backford Cross is located around the A41/A5117 junction.""
+    *   Now look at the **A41 road** section again. It says: ""The A41 is a major trunk road...""
+    *   Is there a specific mention of a ""major truck road"" *in* Backford Cross?
+    *   Let's look at the **Param, Rampur** section again. It says ""8 km from the Grand Truck Road."" This is not Backford Cross.
+    *   Let's look at the **A5117** section again. It says ""East of the junction the road is single carriageway and crosses the A41 by way of a roundabout at Backford Cross.""
+    *   Let's look at the **A41** section again. It passes through ""Chester and Ellesmere Port."" Backford Cross is a suburb of Ellesmere Port.
+    *   Wait, let's look for the specific phrase ""major truck road"" in the context of the location.
+    *   The **Pureland Industrial Complex** section mentions ""connect it to major truck routes.""
+    *   The **U.S. Route 287** section mentions ""major truck route.""
+    *   The **Param, Rampur** section mentions ""Grand Truck Road.""
+    *   The **Backford Cross** section mentions the **A41** and **A5117**.
+    *   The **A41** section describes it as a ""major trunk road."" In the UK, trunk roads often serve as major truck routes.
+    *   However, there is a specific detail in the **A5117** section: ""East of the junction the road is single carriageway and crosses the A41 by way of a roundabout at Backford Cross.""
+    *   Let's re-evaluate the question: ""What major truck road is located in Backford Cross?""
+    *   The text for **Backford Cross** says it is located",True,0.005235602094240837,0.6325827240943909,768,8.948948041535914,0,0,0.042565162393159994,767,0.38852672750977835,raw_reasoning,False
+hotpotqa-121,Princess Jessica,Princess Jessica,True,1.0,1.0000001192092896,262,3.3065314162522554,0,0,0.04304359736041796,261,0.45977011494252873,cue,False
+hotpotqa-122,The Spiderwick Chronicles,The Spiderwick Chronicles,True,1.0,1.000000238418579,292,3.69711104221642,0,0,0.03250887147391657,291,0.44329896907216493,cue,False
+hotpotqa-123,KKR & Co,Kohlberg Kravis Roberts,False,0.0,0.5800160765647888,207,2.8148616664111614,0,0,0.03095167956592615,206,0.470873786407767,cue,False
+hotpotqa-124,The Bye Bye Man,The Bye Bye Man,True,1.0,1.0,335,4.263092499226332,0,0,0.04389220435013641,334,0.49700598802395207,cue,False
+hotpotqa-125,Richmond,Richmond River,True,0.6666666666666666,0.8561476469039917,268,3.386895749717951,0,0,0.01825261048359894,267,0.5168539325842697,cue,False
+hotpotqa-126,Owsley Stanley,Owsley Stanley,True,1.0,1.0,235,3.3395567080006003,0,0,0.01738599467981672,234,0.452991452991453,cue,False
+hotpotqa-127,the late 12th Century,late 12th Century,True,1.0,0.9758241772651672,222,3.0093083744868636,0,0,0.029962209261930273,221,0.4343891402714932,cue,False
+hotpotqa-128,"San Luis Obispo, California","San Luis Obispo, California",True,1.0,1.0000001192092896,231,3.148080832324922,0,0,0.04821514054405007,230,0.5,cue,False
+hotpotqa-129,Mercedes-Benz Superdome,Mercedes-Benz Superdome,True,1.0,1.0,660,7.951134416274726,0,0,0.03254060735018016,659,0.27921092564491656,cue,False
+hotpotqa-130,LaLee's Kin: The Legacy of Cotton,LaLee's Kin: The Legacy of Cotton,True,1.0,1.0,179,2.4279380002990365,0,0,0.028162763251470935,178,0.42696629213483145,cue,False
+hotpotqa-131,Pirate's Cove,Pirate's Cove,True,1.0,0.9999999403953552,200,2.807037125341594,0,0,0.022901808235857857,199,0.38190954773869346,cue,False
+hotpotqa-132,Crystal Dynamics,Crystal Dynamics,True,1.0,1.0,680,9.831046542152762,1,1,0.02232508085485252,679,0.43446244477172313,cue,False
+hotpotqa-133,"""The Marshall Mathers LP 2""",The Marshall Mathers LP 2,True,1.0,0.9820738434791565,231,3.4365489995107055,0,0,0.02687916643677113,230,0.4608695652173913,cue,False
+hotpotqa-134,Suicide Squad,"<think>
+
+</think>
+
+To find the answer, we need to identify the director and writer mentioned in the question and then look for the other film they wrote or directed.
+
+1.  **Identify the director/writer:** The question asks about an American crime film set in South Los Angeles that was written and directed by the same person who wrote ""Street Kings"", ""End of Watch"", ""Sabotage"", and ""Fury"".
+2.  **Locate the person in the text:** Looking at the section on **David Ayer**, the text states: ""He is best known for being the writer of 'Training Day' (2001), and the director and writer of 'Harsh Times' (2005), 'Street Kings' (2008), 'End of Watch' (2012), 'Sabotage' (2014), 'Fury' (2014), and 'Suicide Squad' (2016).""
+3.  **Verify the film set in South Los Angeles:** The section on **Harsh Times** states: ""Harsh Times is a 2005 American crime film set in South Los Angeles... and was written and directed by David Ayer."" This matches the description in the question.
+4.  **Identify the ""other film"":** The question lists ""Street Kings"", ""End of Watch"", ""Sabotage"", and ""Fury"" and asks for the ""other film"" associated with this director/writer. In the David Ayer section, the text lists ""Training Day"" (2001) as the film he is best known for being the *writer* of, and ""Harsh Times"" as the film he wrote and directed. However, the question phrasing ""written and directed by the same director and writer of screenwriter of 'Street Kings', 'End of Watch', 'Sabotage', 'Fury' and what other film?"" implies we are looking for the film that completes the list of works by David Ayer mentioned in the text.
+    *   The text lists: ""Training Day"" (writer), ""Harsh Times"" (writer/director), ""Street Kings"" (writer/director), ""End of Watch"" (writer/director), ""Sabotage"" (writer/director), ""Fury"" (writer/director), and ""Suicide Squad"" (writer/director).
+    *   The question asks for the film set in South Los Angeles written and directed by this person. That film is **Harsh Times**.
+    *   The question then asks what *other* film is associated with this director/writer in the list provided in the text. The text explicitly mentions ""Training Day"" as the film he is best known for being the writer of, and ""Suicide Squad"" as another film he directed and wrote.
+    *   However, re-reading the specific question structure: ""This American crime film set in South Los Angeles was written and directed by the same director and writer of screenwriter of 'Street Kings', 'End of Watch', 'Sabotage', 'Fury' and what other film?""
+    *   The ""This American crime film"" refers to **Harsh Times** (which is set in South LA and written/directed by David Ayer).
+    *   The question asks for the ""other film"" that David Ayer is associated with in the list. The text lists ""Training Day"" as the film he is best known for being the writer of. It also lists ""Suicide Squad"".
+    *   Let's look at the phrasing again. It asks for the film that",True,0.00954653937947494,0.6126009821891785,768,10.422528125345707,1,1,0.027932546093175414,767,0.423728813559322,raw_reasoning,False
+hotpotqa-135,Jillian Belk,Jillian Belk,True,1.0,1.0000001192092896,203,3.0447152499109507,0,0,0.023323038344394087,202,0.5099009900990099,cue,False
+hotpotqa-136,Texas Tech University,Texas Tech University,True,1.0,1.0,179,2.733752707950771,0,0,0.022539910963682575,178,0.43820224719101125,cue,False
+hotpotqa-137,Lord Combermere,"Stapleton Cotton, 1st Viscount Combermere",False,0.28571428571428575,0.7496337890625,461,5.703272624872625,0,0,0.023417911589243445,460,0.4391304347826087,cue,False
+hotpotqa-138,"seasonal television specials, particularly its work in stop motion animation","seasonal television specials, particularly its work in stop motion animation",True,1.0,1.0,200,3.1409407081082463,0,0,0.021511055828941528,199,0.5226130653266332,cue,False
+hotpotqa-139,2014,2014,True,1.0,1.0000001192092896,199,3.828664000146091,1,1,0.05900846735238474,198,0.41919191919191917,cue,False
+hotpotqa-140,Oxford,Oxford University,True,0.6666666666666666,0.9027249217033386,210,2.8259796667844057,0,0,0.0170048397749627,209,0.44976076555023925,cue,False
+hotpotqa-141,Roberta Vinci,Roberta Vinci,True,1.0,1.0000001192092896,186,4.102447082288563,1,1,0.022167728779713514,185,0.44324324324324327,cue,False
+hotpotqa-142,"""Teach the Controversy"" campaign",Teach the Controversy,False,0.8,0.9454135298728943,318,5.736249791458249,1,1,0.05365298153766318,317,0.4668769716088328,cue,False
+hotpotqa-143,Lostprophets disbanded in 2013 after Watkins was charged with sexual offences in late 2012.,Ian Watkins,False,0.125,0.5520656704902649,277,3.5350047079846263,0,0,0.02417190956517068,276,0.4528985507246377,cue,False
+hotpotqa-144,Nebo Zovyot,Nebo Zovyot,True,1.0,1.0000001192092896,345,4.204375208355486,0,0,0.042293407296646546,344,0.5174418604651163,cue,False
+hotpotqa-145,Erika Jayne,Erika Jayne,True,1.0,0.9999999403953552,269,5.1820579171180725,1,1,0.03145550362495442,268,0.40298507462686567,cue,False
+hotpotqa-146,2009,2009,True,1.0,1.0000001192092896,216,3.123346082866192,0,0,0.018846283375250295,215,0.3953488372093023,cue,False
+hotpotqa-147,Kingdom of the Isles,Kingdom of the Isles,True,1.0,1.0,400,5.077648958191276,0,0,0.04644791792020264,399,0.42355889724310775,cue,False
+hotpotqa-148,The Beatles,The Beatles,True,1.0,1.0000001192092896,210,2.8629009583964944,0,0,0.030291469877835375,209,0.430622009569378,cue,False
+hotpotqa-149,"""We'll Burn That Bridge""",We'll Burn That Bridge,True,1.0,0.9666814804077148,397,4.979721083305776,0,0,0.04407369372449921,396,0.41414141414141414,cue,False

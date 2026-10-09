@@ -1,0 +1,40 @@
+
+================================================================================
+DRAGIN-RLM HotpotQA Evaluation Summary
+================================================================================
+
+ACCURACY METRICS:
+  - Accuracy:              0.807
+  - F1 Score:              0.801
+  - Semantic Similarity:   0.924
+
+EFFICIENCY METRICS:
+  - Avg Tokens:            293 per question
+  - Total Tokens:          43884
+  - Avg Latency:           4.21s per question
+
+RETRIEVAL METRICS:
+  - Total Retrievals:      39 (worker calls)
+  - Avg Retrievals:        0.26 per question
+  - Max Retrievals:        2
+
+RIND (Retrieval-Induced Neuron Divergence) METRICS:
+  - Avg RIND Score:        0.032
+  - Max RIND Score:        0.075
+  - Min RIND Score:        0.014
+  - Avg Nonstopword Ratio: 0.445
+
+RIND INTERPRETATION:
+  - Higher RIND score → more uncertain/ambiguous
+  - Nonstopword ratio → fraction of semantic tokens checked
+  - Theta threshold: 0.01 (triggers when RIND > theta)
+
+TRIGGERING ANALYSIS:
+  - Questions with retrievals: 36/150
+  - Avg confidence (no retrieval): 114 questions
+  - Avg uncertainty (with retrieval): 36 questions
+
+Questions evaluated: 150
+Config: dragin_rlm_hotpotqa.yaml
+Root model: mlx-community/Qwen3.5-35B-A3B-4bit
+Worker model: mlx-community/Qwen3.5-2B
