@@ -307,6 +307,9 @@ def run_dragin(
     rind_nonstopword_tokens = 0
 
     time_capped = False
+    # Token index where the current generation segment starts: 0 at the beginning,
+    # then the rollback point after each retrieval.
+    seg_base = 0
     while budget > 0 and len(triggers) < cfg.max_triggers:
         segments_run += 1
         seg_start = time.perf_counter()
@@ -333,11 +336,12 @@ def run_dragin(
                             "max_attn": state.max_attn[idx],
                             "semantic": state.semantic[idx],
                         }
-                    # Ignore triggers before min_prefix_tokens: the first few
-                    # tokens have no context, so a retrieval query built from
-                    # them is nearly empty and returns passages that can't
-                    # answer the question.
-                    if score > cfg.theta and idx >= cfg.min_prefix_tokens:
+                    # Require min_prefix_tokens of new generation in this segment
+                    # before a trigger counts. Otherwise the first tokens (no
+                    # context yet) trigger a near-empty retrieval, and after each
+                    # rollback the tokens kept before the retrieval would let the
+                    # very next token trigger again.
+                    if score > cfg.theta and idx + 1 - seg_base >= cfg.min_prefix_tokens:
                         triggered_at = idx
                         break
                 if _cue_line_complete(generated_text) or budget <= 0:
@@ -355,6 +359,7 @@ def run_dragin(
         score = state.score_at(triggered_at)
         query_str = qfs.format_query(prior_tokens, row, cfg.top_n)
         state.reset_from(triggered_at)
+        seg_base = triggered_at
 
         passages = retrieval.slice_context(
             context,
