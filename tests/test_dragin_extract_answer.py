@@ -57,8 +57,8 @@ def test_fallback_skips_empty_latest_worker_answer():
     # token budget), which used to make the whole answer empty even though an
     # earlier retrieval had a real worker answer.
     triggers = [
-        {"worker_answer": "Fort Smith Museum of History"},
-        {"worker_answer": ""},
+        {"query": "q1", "worker_answer": "Fort Smith Museum of History"},
+        {"query": "q2", "worker_answer": ""},
     ]
     result = _result(triggers)
     assert result["answer"] == "Fort Smith Museum of History"
