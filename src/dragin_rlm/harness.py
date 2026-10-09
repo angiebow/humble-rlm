@@ -362,13 +362,15 @@ def run_dragin(
         state.reset_from(triggered_at)
         seg_base = triggered_at
 
+        # BM25 uses the question plus the QFS keywords; the worker answers the
+        # original question over the passages it is given.
         passages = retrieval.slice_context(
             context,
-            query_str or query,
+            f"{query} {query_str}".strip(),
             top_k=cfg.retrieval_top_k,
             passage_chars=cfg.passage_chars,
         )
-        worker_answer = _call_worker(cfg.worker_model, query_str or query, passages)
+        worker_answer = _call_worker(cfg.worker_model, query, passages)
         triggers.append(
             {
                 "index": triggered_at,
